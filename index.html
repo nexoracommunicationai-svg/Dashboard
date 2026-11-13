@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPilot — Calculez votre seuil de rentabilité</title>
+    <meta name="description" content="MarketPilot aide les e-commerçants à fixer leur seuil de rentabilité avant une publicité, puis à lire les résultats de leur campagne.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F2B46'/%3E%3Cpath d='M8 22 L24 9 L19 25 L15.5 17.5 Z' fill='%23F2B124'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a class="skip" href="#contenu">Aller au contenu</a>
+
+    <header class="topbar">
+        <div class="wrap topbar__in">
+            <a class="brand" href="#top" aria-label="MarketPilot, retour en haut">
+                <svg class="brand__mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="var(--ink)"/>
+                    <path d="M8 22 L24 9 L19 25 L15.5 17.5 Z" fill="var(--signal)"/>
+                </svg>
+                <span class="brand__name">MarketPilot</span>
+            </a>
+            <nav class="nav" aria-label="Sections">
+                <a href="#parcours">Parcours</a>
+                <a href="#diagnostic">Diagnostic</a>
+                <a href="#donnees">Données</a>
+                <a href="#etat">État du produit</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="contenu">
+        <!-- Accueil : question + calculateur en direct -->
+        <section class="hero" id="top">
+            <div class="wrap hero__grid">
+                <div class="hero__text">
+                    <h1>Combien <span class="nowrap">pouvez-vous</span> payer pour obtenir une commande ?</h1>
+                    <p class="lead">MarketPilot calcule votre seuil de rentabilité avant le lancement d'une publicité. Il lit ensuite les résultats de votre campagne et vous dit s'il faut continuer, modifier, tester ou arrêter.</p>
+                    <div class="actions">
+                        <a class="btn btn--primary" href="#p" data-focus="p">Saisir mes chiffres</a>
+                        <a class="btn btn--quiet" href="#parcours">Voir le parcours</a>
+                    </div>
+                    <p class="fineprint">Le calculateur fonctionne déjà. Vos chiffres restent dans votre navigateur.</p>
+                </div>
+
+                <div class="calc" id="calculateur" role="group" aria-labelledby="calc-title">
+                    <div class="calc__head">
+                        <h2 id="calc-title">Où va le prix de chaque vente</h2>
+                        <p class="calc__hint">Valeurs d'exemple : remplacez-les par les vôtres.</p>
+                    </div>
+
+                    <div class="bar" aria-hidden="true">
+                        <span class="bar__seg bar__seg--c" id="seg-c"></span>
+                        <span class="bar__seg bar__seg--l" id="seg-l"></span>
+                        <span class="bar__seg bar__seg--f" id="seg-f"></span>
+                        <span class="bar__seg bar__seg--a" id="seg-a"></span>
+                        <span class="bar__seg bar__seg--m" id="seg-m"></span>
+                    </div>
+                    <ul class="legend" id="legend">
+                        <li><i class="sw sw--c"></i><span>Coût du produit</span><b id="lg-c">—</b></li>
+                        <li><i class="sw sw--l"></i><span>Livraison</span><b id="lg-l">—</b></li>
+                        <li><i class="sw sw--f"></i><span>Frais de paiement</span><b id="lg-f">—</b></li>
+                        <li><i class="sw sw--a"></i><span>Autres charges</span><b id="lg-a">—</b></li>
+                        <li><i class="sw sw--m"></i><span>Marge avant publicité</span><b id="lg-m">—</b></li>
+                    </ul>
+
+                    <div class="results" aria-live="polite">
+                        <div class="results__main">
+                            <span class="results__label">CAC maximal</span>
+                            <strong class="results__value" id="res-cac">—</strong>
+                            <span class="results__sub">C'est le plus que vous pouvez payer pour une commande sans perdre d'argent.</span>
+                        </div>
+                        <dl class="results__list">
+                            <div><dt>Marge avant publicité</dt><dd id="res-m">—</dd></div>
+                            <div><dt>ROAS de rentabilité</dt><dd id="res-roas">—</dd></div>
+                            <div><dt>Commandes pour couvrir le budget</dt><dd id="res-seuil">—</dd></div>
+                            <div class="is-optional" id="row-cacreel" hidden><dt>CAC obtenu</dt><dd id="res-cacreel">—</dd></div>
+                            <div class="is-optional" id="row-net" hidden><dt>Marge nette du test</dt><dd id="res-net">—</dd></div>
+                        </dl>
+                        <p class="results__msg" id="res-msg" hidden></p>
+                        <p class="results__badge"><span class="badge badge--est">Estimé</span> Calculé à partir de vos saisies, sans source externe.</p>
+                    </div>
+
+                    <form class="fields" id="form" novalidate autocomplete="off">
+                        <div class="field field--wide">
+                            <label for="devise">Devise d'affichage</label>
+                            <select id="devise">
+                                <option value="EUR">Euro (EUR)</option>
+                                <option value="XAF">Franc CFA d'Afrique centrale (XAF)</option>
+                                <option value="XOF">Franc CFA d'Afrique de l'Ouest (XOF)</option>
+                                <option value="MAD">Dirham marocain (MAD)</option>
+                                <option value="USD">Dollar américain (USD)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="p">Prix de vente</label>
+                            <input id="p" inputmode="decimal" value="29,90">
+                        </div>
+                        <div class="field">
+                            <label for="c">Coût du produit</label>
+                            <input id="c" inputmode="decimal" value="8">
+                        </div>
+                        <div class="field">
+                            <label for="l">Livraison</label>
+                            <input id="l" inputmode="decimal" value="3,50">
+                        </div>
+                        <div class="field">
+                            <label for="a">Autres charges</label>
+                            <input id="a" inputmode="decimal" value="1">
+                        </div>
+                        <div class="field">
+                            <label for="t">Frais de paiement, en&nbsp;%</label>
+                            <input id="t" inputmode="decimal" value="2,9">
+                        </div>
+                        <div class="field">
+                            <label for="f">Frais fixes par commande</label>
+                            <input id="f" inputmode="decimal" value="0,30">
+                        </div>
+                        <div class="field">
+                            <label for="d">Budget du test</label>
+                            <input id="d" inputmode="decimal" value="150">
+                        </div>
+                        <div class="field">
+                            <label for="n">Commandes payées <span class="opt">(facultatif)</span></label>
+                            <input id="n" inputmode="numeric" placeholder="ex. 12">
+                        </div>
+                        <p class="field field--wide note">La devise ne change que l'affichage. Saisissez tous vos montants dans la même devise.</p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Parcours : une vraie séquence -->
+        <section class="section" id="parcours" aria-labelledby="parcours-title">
+            <div class="wrap split">
+                <div class="split__head">
+                    <h2 id="parcours-title">Du choix du produit au verdict</h2>
+                    <p>Cinq étapes, dans cet ordre. Vous gardez la main sur votre budget et vos campagnes à chaque étape.</p>
+                </div>
+                <ol class="steps">
+                    <li>
+                        <h3>Choisir un produit</h3>
+                        <p>Comparez des pays, des niches et des produits. Chaque indicateur affiche sa provenance. Au départ, ces listes reposent sur des données DEMO.</p>
+                    </li>
+                    <li>
+                        <h3>Fixer le seuil de rentabilité</h3>
+                        <p>Prix, coûts, frais et budget : MarketPilot calcule votre marge, votre CAC maximal et votre ROAS de rentabilité.</p>
+                    </li>
+                    <li>
+                        <h3>Lancer la campagne chez vous</h3>
+                        <p>Vous gérez votre publicité sur Meta ou TikTok. MarketPilot ne modifie ni votre budget, ni vos campagnes.</p>
+                    </li>
+                    <li>
+                        <h3>Importer les résultats</h3>
+                        <p>Déposez le fichier CSV de votre campagne et associez ses colonnes. Une colonne manquante n'empêche pas l'analyse : elle apparaît dans les données manquantes.</p>
+                    </li>
+                    <li>
+                        <h3>Lire le diagnostic</h3>
+                        <p>Chaque étape, de l'impression à la livraison, est comparée à un seuil. Vous recevez une recommandation priorisée, avec sa justification.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Diagnostic : exemple DEMO -->
+        <section class="section section--tint" id="diagnostic" aria-labelledby="diag-title">
+            <div class="wrap split split--reverse">
+                <div class="split__head">
+                    <h2 id="diag-title">Le diagnostic montre où le parcours se casse</h2>
+                    <p>Chaque étape est comparée à un seuil que vous pouvez modifier. Les causes restent des hypothèses tant qu'un test comparatif ne les confirme pas.</p>
+                    <p class="fineprint">Les seuils par défaut sont des points de départ à calibrer. Ce ne sont pas des références de marché.</p>
+                </div>
+
+                <figure class="panel diag" aria-labelledby="diag-cap">
+                    <figcaption class="panel__head" id="diag-cap">
+                        <span>Exemple de test</span>
+                        <span class="badge badge--demo">DEMO</span>
+                    </figcaption>
+                    <p class="diag__legend">La ligne verticale est le seuil. Une barre qui la dépasse est au-dessus du seuil.</p>
+                    <ul class="gauges">
+                        <li class="gauge" style="--fill:70%">
+                            <span class="gauge__name">Clic</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">1,4&nbsp;% <small>seuil 1&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge is-low" style="--fill:37%">
+                            <span class="gauge__name">Visite</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">52&nbsp;% <small>sous le seuil de 70&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge" style="--fill:64%">
+                            <span class="gauge__name">Panier</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">5,1&nbsp;% <small>seuil 4&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge" style="--fill:55%">
+                            <span class="gauge__name">Checkout</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">44&nbsp;% <small>seuil 40&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge" style="--fill:59%">
+                            <span class="gauge__name">Commande</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">47&nbsp;% <small>seuil 40&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge" style="--fill:52%">
+                            <span class="gauge__name">Paiement</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">93&nbsp;% <small>seuil 90&nbsp;%</small></span>
+                        </li>
+                        <li class="gauge" style="--fill:52%">
+                            <span class="gauge__name">Livraison</span>
+                            <span class="gauge__meter"><i></i></span>
+                            <span class="gauge__val">88&nbsp;% <small>seuil 85&nbsp;%</small></span>
+                        </li>
+                    </ul>
+
+                    <div class="verdict">
+                        <p class="verdict__title">Recommandation : modifier</p>
+                        <dl>
+                            <div><dt>Observé</dt><dd>Seuls 52&nbsp;% des clics deviennent des visites, sous le seuil de 70&nbsp;%.</dd></div>
+                            <div><dt>Cause probable, non prouvée</dt><dd>Page lente à charger ou clics involontaires.</dd></div>
+                            <div><dt>Confiance</dt><dd>Faible : 4 commandes payées seulement.</dd></div>
+                            <div><dt>Données manquantes</dt><dd>Vues vidéo.</dd></div>
+                        </dl>
+                    </div>
+                    <p class="fineprint">Chiffres fictifs, créés pour l'exemple.</p>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Données : provenance -->
+        <section class="section" id="donnees" aria-labelledby="data-title">
+            <div class="wrap split">
+                <div class="split__head">
+                    <h2 id="data-title">Chaque chiffre dit d'où il vient</h2>
+                    <p>La source, la date, le pays, la méthode et le niveau de confiance accompagnent chaque donnée. Quatre statuts indiquent comment la lire.</p>
+                    <p>MarketPilot n'invente aucune statistique et ne simule aucune connexion.</p>
+                </div>
+
+                <div class="stack">
+                    <dl class="status">
+                        <div>
+                            <dt><span class="badge badge--ver"><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2 6.5 L5 9.5 L10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifié</span></dt>
+                            <dd>Reçu par une connexion officielle. Aucun chiffre n'a ce statut pour l'instant.</dd>
+                        </div>
+                        <div>
+                            <dt><span class="badge badge--est">Estimé</span></dt>
+                            <dd>Calculé par MarketPilot. La formule est affichée.</dd>
+                        </div>
+                        <div>
+                            <dt><span class="badge badge--imp">Importé</span></dt>
+                            <dd>Fourni par vous dans un fichier CSV. Non vérifié.</dd>
+                        </div>
+                        <div>
+                            <dt><span class="badge badge--demo">DEMO</span></dt>
+                            <dd>Fictif, pour essayer le produit. Jamais mélangé aux données réelles.</dd>
+                        </div>
+                    </dl>
+
+                    <div class="connect">
+                        <h3>Connexions</h3>
+                        <ul>
+                            <li><span>Import CSV</span><b class="state state--on">Actif</b></li>
+                            <li><span>Meta Ads</span><b class="state">Non connecté</b></li>
+                            <li><span>TikTok Ads</span><b class="state">Non connecté</b></li>
+                            <li><span>Shopify</span><b class="state">Non connecté</b></li>
+                            <li><span>WooCommerce</span><b class="state">Non connecté</b></li>
+                        </ul>
+                        <p class="fineprint">Pour chaque connecteur, MarketPilot affiche son état et les étapes pour l'activer.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- État du produit -->
+        <section class="section section--tint" id="etat" aria-labelledby="etat-title">
+            <div class="wrap split">
+                <div class="split__head">
+                    <h2 id="etat-title">Où en est MarketPilot</h2>
+                    <p>Le premier MVP est en construction. Il se concentre sur une promesse : tester un produit en publicité sans deviner.</p>
+                </div>
+                <div class="roadmap">
+                    <div>
+                        <h3>Dans le premier MVP</h3>
+                        <ul>
+                            <li>Compte, espace de travail et rôles</li>
+                            <li>Explorateurs de marchés, de niches et de produits, sur données DEMO</li>
+                            <li>Création d'un test publicitaire et seuil de rentabilité</li>
+                            <li>Import CSV, entonnoir et diagnostic à règles</li>
+                            <li>Badges de provenance et écran des connecteurs</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Plus tard</h3>
+                        <ul>
+                            <li>Connexions réelles à Meta Ads, TikTok Ads, Shopify et WooCommerce</li>
+                            <li>Clients, créations publicitaires, fournisseurs, concurrents et ventes</li>
+                            <li>Tendances et prévisions</li>
+                            <li>Copilote IA qui explique les diagnostics</li>
+                            <li>Abonnements et quotas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="closing">
+            <div class="wrap closing__in">
+                <h2>Votre prochain test <span class="nowrap">est-il</span> rentable sur le papier ?</h2>
+                <a class="btn btn--primary" href="#p" data-focus="p">Refaire le calcul avec mes chiffres</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap foot__in">
+            <span>© 2026 MarketPilot</span>
+            <span>Page de présentation d'un produit en construction. Les exemples marqués DEMO sont fictifs.</span>
+        </div>
+    </footer>
+
+    <script>
+    (function () {
+        var $ = function (id) { return document.getElementById(id); };
+
+        // Lit un nombre saisi avec virgule ou point. Champ vide : valeur par défaut.
+        function read(id, fallback) {
+            var raw = $(id).value.trim();
+            if (raw === '') return fallback;
+            var n = parseFloat(raw.replace(/\s/g, '').replace(',', '.'));
+            return isFinite(n) ? n : NaN;
+        }
+
+        function money(v) {
+            try {
+                return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: $('devise').value }).format(v);
+            } catch (e) {
+                return v.toFixed(2);
+            }
+        }
+
+        function dec(v) {
+            return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+        }
+
+        function setBar(id, share) {
+            $(id).style.width = Math.max(share, 0) + '%';
+        }
+
+        function showMsg(text, kind) {
+            var el = $('res-msg');
+            if (!text) { el.hidden = true; el.textContent = ''; return; }
+            el.hidden = false;
+            el.textContent = text;
+            el.className = 'results__msg results__msg--' + (kind || 'info');
+        }
+
+        function reset() {
+            ['res-cac', 'res-m', 'res-roas', 'res-seuil', 'lg-c', 'lg-l', 'lg-f', 'lg-a', 'lg-m'].forEach(function (id) {
+                $(id).textContent = '—';
+            });
+            $('row-cacreel').hidden = true;
+            $('row-net').hidden = true;
+            ['seg-c', 'seg-l', 'seg-f', 'seg-a', 'seg-m'].forEach(function (id) { setBar(id, 0); });
+        }
+
+        function compute() {
+            var p = read('p', NaN);
+            var c = read('c', 0), l = read('l', 0), a = read('a', 0);
+            var t = read('t', 0), f = read('f', 0);
+            var d = read('d', 0);
+            var n = read('n', 0);
+
+            var all = [p, c, l, a, t, f, d, n];
+            if (all.some(function (x) { return isNaN(x); })) {
+                reset();
+                showMsg('Un champ contient autre chose qu\'un nombre. Corrigez-le pour voir le résultat.', 'warn');
+                return;
+            }
+            if (!(p > 0)) {
+                reset();
+                showMsg('Saisissez un prix de vente supérieur à zéro.', 'warn');
+                return;
+            }
+            if ([c, l, a, t, f, d, n].some(function (x) { return x < 0; }) || t > 100) {
+                reset();
+                showMsg('Les montants ne peuvent pas être négatifs, et les frais de paiement vont de 0 à 100 %.', 'warn');
+                return;
+            }
+
+            var fees = p * (t / 100) + f;          // frais de paiement par commande
+            var m = p - c - l - fees - a;           // marge avant publicité
+            var costs = c + l + fees + a;
+            var total = Math.max(p, costs);
+
+            // Barre : où va le prix de vente
+            setBar('seg-c', c / total * 100);
+            setBar('seg-l', l / total * 100);
+            setBar('seg-f', fees / total * 100);
+            setBar('seg-a', a / total * 100);
+            setBar('seg-m', Math.max(m, 0) / total * 100);
+            $('lg-c').textContent = money(c);
+            $('lg-l').textContent = money(l);
+            $('lg-f').textContent = money(fees);
+            $('lg-a').textContent = money(a);
+            $('lg-m').textContent = money(m);
+
+            $('res-m').textContent = money(m);
+            $('row-cacreel').hidden = true;
+            $('row-net').hidden = true;
+            $('res-net').className = '';
+
+            if (m <= 0) {
+                $('res-cac').textContent = '—';
+                $('res-roas').textContent = '—';
+                $('res-seuil').textContent = '—';
+                showMsg('La marge est nulle ou négative : aucun nombre de commandes ne rend ce test rentable. Baissez vos coûts ou augmentez le prix.', 'bad');
+                return;
+            }
+
+            showMsg('');
+            $('res-cac').textContent = money(m);                    // CAC maximal = m
+            $('res-roas').textContent = dec(p / m);                 // ROAS de rentabilité = p / m
+            if (d > 0) {
+                var need = Math.ceil(d / m - 1e-9);                 // commandes pour couvrir le budget
+                $('res-seuil').textContent = need + (need > 1 ? ' commandes' : ' commande');
+            } else {
+                $('res-seuil').textContent = 'Saisissez un budget';
+            }
+
+            if (n > 0 && d > 0) {
+                var net = n * m - d;                                // marge nette = N·m − D
+                $('row-cacreel').hidden = false;
+                $('row-net').hidden = false;
+                $('res-cacreel').textContent = money(d / n) + (d / n <= m ? ' (sous le maximum)' : ' (au-dessus du maximum)');
+                $('res-net').textContent = (net > 0 ? '+' : '') + money(net);
+                $('res-net').className = net >= 0 ? 'is-gain' : 'is-loss';
+            }
+        }
+
+        $('form').addEventListener('input', compute);
+        $('form').addEventListener('submit', function (e) { e.preventDefault(); });
+
+        // Les boutons « Saisir mes chiffres » placent le curseur dans le premier champ.
+        Array.prototype.forEach.call(document.querySelectorAll('[data-focus]'), function (a) {
+            a.addEventListener('click', function () {
+                var target = $(a.getAttribute('data-focus'));
+                setTimeout(function () { target.focus({ preventScroll: true }); }, 250);
+            });
+        });
+
+        // Au chargement, les segments s'étirent une fois depuis zéro.
+        reset();
+        requestAnimationFrame(function () { requestAnimationFrame(compute); });
+    })();
+    </script>
+</body>
+</html>
