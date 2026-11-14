@@ -1,462 +1,1057 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarketPilot — Calculez votre seuil de rentabilité</title>
-    <meta name="description" content="MarketPilot aide les e-commerçants à fixer leur seuil de rentabilité avant une publicité, puis à lire les résultats de leur campagne.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F2B46'/%3E%3Cpath d='M8 22 L24 9 L19 25 L15.5 17.5 Z' fill='%23F2B124'/%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MarketPilot — Tableau de bord</title>
+  <meta name="description" content="MarketPilot : suivez la rentabilité de vos tests publicitaires e-commerce (CAC maximal, ROAS de rentabilité, marge nette, diagnostic). Prototype avec données de démonstration.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F2B46'/%3E%3Cpath d='M8 22 L24 9 L19 25 L15.5 17.5 Z' fill='%23F2B124'/%3E%3C/svg%3E">
+  <!-- Thème appliqué avant l'affichage pour éviter le flash blanc -->
+  <script>
+    (function () {
+      var t = 'auto';
+      try { t = JSON.parse(localStorage.getItem('mp.theme')) || 'auto'; } catch (e) {}
+      var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a class="skip" href="#contenu">Aller au contenu</a>
 
-    <header class="topbar">
-        <div class="wrap topbar__in">
-            <a class="brand" href="#top" aria-label="MarketPilot, retour en haut">
-                <svg class="brand__mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
-                    <rect width="32" height="32" rx="8" fill="var(--ink)"/>
-                    <path d="M8 22 L24 9 L19 25 L15.5 17.5 Z" fill="var(--signal)"/>
-                </svg>
-                <span class="brand__name">MarketPilot</span>
-            </a>
-            <nav class="nav" aria-label="Sections">
-                <a href="#parcours">Parcours</a>
-                <a href="#diagnostic">Diagnostic</a>
-                <a href="#donnees">Données</a>
-                <a href="#etat">État du produit</a>
-            </nav>
+<!-- Icônes (sprite SVG) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="var(--logo-bg, #0F2B46)"/><path d="M8 22 L24 9 L19 25 L15.5 17.5 Z" fill="#F2B124"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v9l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v9"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5.5 9.5A1.5 1.5 0 0 0 5.8 21h12.4a1.5 1.5 0 0 0 1.3-2.5L14 9V3"/><path d="M7.5 15h9"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M16 8l4 4-4 4M20 12H9"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.5C3.8 8.3 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip-link" href="#main">Aller au contenu principal</a>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript><p class="noscript">MarketPilot a besoin de JavaScript pour fonctionner. Activez-le dans votre navigateur puis rechargez la page.</p></noscript>
+
+<!-- ===================== CONNEXION / INSCRIPTION ===================== -->
+<div class="auth" id="auth" hidden>
+  <aside class="auth-aside">
+    <div class="brand brand-on-dark">
+      <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+      <span class="brand-name">MarketPilot</span>
+    </div>
+    <div class="aside-copy">
+      <p class="aside-title">Sachez si vos publicités sont rentables avant d'épuiser votre budget.</p>
+      <ul class="aside-list">
+        <li>CAC maximal, ROAS de rentabilité et marge nette calculés pour chaque test.</li>
+        <li>Un diagnostic étape par étape : clic, visite, panier, commande.</li>
+        <li>Chaque donnée porte son statut : Estimé, Importé ou DEMO.</li>
+      </ul>
+    </div>
+    <p class="aside-foot">Prototype · données de démonstration uniquement</p>
+  </aside>
+
+  <div class="auth-main">
+    <!-- Connexion -->
+    <section class="auth-view" id="view-connexion" aria-labelledby="login-title" hidden>
+      <a class="brand auth-logo" href="#/connexion"><svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg><span class="brand-name">MarketPilot</span></a>
+      <h1 id="login-title" tabindex="-1">Connexion</h1>
+      <p class="auth-sub">Pas encore de compte ? <a href="#/inscription">Créer un compte</a></p>
+      <p class="proto-note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Prototype : le compte est enregistré sur cet appareil uniquement. Le mot de passe n'est ni vérifié ni conservé.</span></p>
+
+      <form id="form-login" novalidate>
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <div class="input-wrap"><input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="votre@email.com" required aria-describedby="login-email-err"></div>
+          <p class="field-error" id="login-email-err" hidden></p>
         </div>
+        <div class="field">
+          <div class="label-row"><label for="login-pass">Mot de passe</label><button type="button" class="btn-link small" id="btn-forgot">Oublié ?</button></div>
+          <div class="input-wrap has-icon">
+            <svg class="ico lead" aria-hidden="true"><use href="#i-lock"/></svg>
+            <input id="login-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required aria-describedby="login-pass-err">
+            <button type="button" class="eye" data-eye="login-pass" aria-label="Afficher le mot de passe" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg></button>
+          </div>
+          <p class="field-error" id="login-pass-err" hidden></p>
+        </div>
+        <p class="form-error" id="login-err" role="alert" hidden></p>
+        <div class="actions"><button class="btn btn-primary btn-pill" type="submit">Se connecter <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+      </form>
+
+      <div class="auth-or"><span>ou</span></div>
+      <button class="btn btn-secondary btn-pill btn-block" id="btn-guest" type="button">Explorer la démonstration sans compte</button>
+    </section>
+
+    <!-- Inscription -->
+    <section class="auth-view" id="view-inscription" aria-labelledby="signup-title" hidden>
+      <a class="back-link" href="#/connexion" aria-label="Retour à la connexion"><svg class="ico" aria-hidden="true"><use href="#i-left"/></svg></a>
+      <h1 id="signup-title" tabindex="-1">Créer un compte</h1>
+      <p class="auth-sub">Déjà un compte ? <a href="#/connexion">Se connecter</a></p>
+      <p class="proto-note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Prototype : le compte reste sur cet appareil. Aucune donnée n'est envoyée à un serveur et le mot de passe n'est pas conservé.</span></p>
+
+      <form id="form-signup" novalidate>
+        <div class="field">
+          <label for="su-name">Nom complet</label>
+          <div class="input-wrap"><input id="su-name" name="name" type="text" autocomplete="name" placeholder="Jean Dupont" required aria-describedby="su-name-err"></div>
+          <p class="field-error" id="su-name-err" hidden></p>
+        </div>
+        <div class="field">
+          <label for="su-email">E-mail</label>
+          <div class="input-wrap"><input id="su-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="jean@boutique.fr" required aria-describedby="su-email-err"></div>
+          <p class="field-error" id="su-email-err" hidden></p>
+        </div>
+        <div class="field">
+          <label for="su-pass">Mot de passe</label>
+          <div class="input-wrap has-icon">
+            <svg class="ico lead" aria-hidden="true"><use href="#i-lock"/></svg>
+            <input id="su-pass" name="password" type="password" autocomplete="new-password" placeholder="••••••••" minlength="8" required aria-describedby="su-pass-hint su-pass-err">
+            <button type="button" class="eye" data-eye="su-pass" aria-label="Afficher le mot de passe" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg></button>
+          </div>
+          <p class="hint" id="su-pass-hint">8 caractères minimum</p>
+          <p class="field-error" id="su-pass-err" hidden></p>
+        </div>
+        <div class="actions"><button class="btn btn-primary btn-pill" type="submit">Créer mon compte <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+      </form>
+      <p class="legal">En créant un compte, vous acceptez les conditions d'utilisation et la politique de confidentialité, qui seront publiées avant l'ouverture au public.</p>
+    </section>
+  </div>
+</div>
+
+<!-- ===================== APPLICATION ===================== -->
+<div class="app" id="app" hidden>
+
+  <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+    <a class="brand" href="#/accueil">
+      <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+      <span class="brand-text"><span class="brand-name">MarketPilot</span><span class="brand-tag">Intelligence e-com</span></span>
+    </a>
+
+    <a class="workspace" href="#/parametres" aria-label="Espace de travail, plan Free : ouvrir les paramètres">
+      <span class="ws-avatar" id="ws-initials" aria-hidden="true">MP</span>
+      <span class="ws-text"><strong id="ws-name">Mon espace de travail</strong><small>Plan Free</small></span>
+      <svg class="ico" aria-hidden="true"><use href="#i-right"/></svg>
+    </a>
+
+    <button class="side-search" id="side-search" type="button">
+      <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Rechercher…</span><kbd id="kbd-hint">Ctrl K</kbd>
+    </button>
+
+    <nav class="nav" aria-label="Sections">
+      <ul>
+        <li><a class="nav-link" href="#/accueil" data-nav="accueil"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg>Accueil</a></li>
+      </ul>
+      <p class="nav-group" id="g-explorer">Explorer</p>
+      <ul aria-labelledby="g-explorer">
+        <li><a class="nav-link" href="#/marches" data-nav="marches"><svg class="ico" aria-hidden="true"><use href="#i-globe"/></svg>Marchés<span class="soon">Bientôt</span></a></li>
+        <li><a class="nav-link" href="#/niches" data-nav="niches"><svg class="ico" aria-hidden="true"><use href="#i-grid"/></svg>Niches<span class="soon">Bientôt</span></a></li>
+        <li><a class="nav-link" href="#/produits" data-nav="produits"><svg class="ico" aria-hidden="true"><use href="#i-box"/></svg>Produits<span class="soon">Bientôt</span></a></li>
+      </ul>
+      <p class="nav-group" id="g-lab">Ad Testing Lab</p>
+      <ul aria-labelledby="g-lab">
+        <li><a class="nav-link" href="#/tests" data-nav="tests"><svg class="ico" aria-hidden="true"><use href="#i-flask"/></svg>Mes tests<span class="count-badge" id="nav-count">4</span></a></li>
+        <li><a class="nav-link" href="#/nouveau" data-nav="nouveau"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg>Nouveau test</a></li>
+        <li><a class="nav-link" href="#/import" data-nav="import"><svg class="ico" aria-hidden="true"><use href="#i-upload"/></svg>Importer un CSV<span class="soon">Bientôt</span></a></li>
+        <li><a class="nav-link" href="#/diagnostics" data-nav="diagnostics"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg>Diagnostics</a></li>
+      </ul>
+      <p class="nav-group" id="g-data">Données</p>
+      <ul aria-labelledby="g-data">
+        <li><a class="nav-link" href="#/connecteurs" data-nav="connecteurs"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>Connecteurs</a></li>
+        <li><a class="nav-link" href="#/favoris" data-nav="favoris"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>Favoris</a></li>
+      </ul>
+    </nav>
+
+    <div class="side-foot">
+      <a class="nav-link" href="#/parametres" data-nav="parametres"><svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg>Paramètres</a>
+      <button class="nav-link danger" type="button" id="btn-logout"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg>Se déconnecter</button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main-col">
+    <header class="topbar">
+      <button class="icon-btn" id="nav-toggle" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Masquer le menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/accueil">Mon espace</a><span aria-hidden="true">/</span><span id="crumb" aria-current="page">Accueil</span></nav>
+
+      <div class="gsearch" role="search">
+        <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="gsearch" type="search" role="combobox" aria-expanded="false" aria-controls="gsearch-list" aria-autocomplete="list" aria-label="Recherche globale" placeholder="Rechercher un marché, une niche, un produit…" autocomplete="off" spellcheck="false">
+        <ul id="gsearch-list" class="gsearch-list" role="listbox" aria-label="Résultats" hidden></ul>
+      </div>
+
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Passer au thème sombre"><svg class="ico" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      <div class="user-menu">
+        <button class="avatar" id="user-btn" type="button" aria-expanded="false" aria-controls="user-pop" aria-label="Menu du compte"><span id="avatar-initials">MP</span></button>
+        <div class="popover" id="user-pop" hidden>
+          <p class="pop-name" id="pop-name">Invité</p>
+          <p class="pop-mail" id="pop-mail"></p>
+          <a href="#/parametres">Paramètres</a>
+          <button type="button" id="btn-logout-2">Se déconnecter</button>
+        </div>
+      </div>
     </header>
 
-    <main id="contenu">
-        <!-- Accueil : question + calculateur en direct -->
-        <section class="hero" id="top">
-            <div class="wrap hero__grid">
-                <div class="hero__text">
-                    <h1>Combien <span class="nowrap">pouvez-vous</span> payer pour obtenir une commande ?</h1>
-                    <p class="lead">MarketPilot calcule votre seuil de rentabilité avant le lancement d'une publicité. Il lit ensuite les résultats de votre campagne et vous dit s'il faut continuer, modifier, tester ou arrêter.</p>
-                    <div class="actions">
-                        <a class="btn btn--primary" href="#p" data-focus="p">Saisir mes chiffres</a>
-                        <a class="btn btn--quiet" href="#parcours">Voir le parcours</a>
-                    </div>
-                    <p class="fineprint">Le calculateur fonctionne déjà. Vos chiffres restent dans votre navigateur.</p>
-                </div>
+    <main id="main" tabindex="-1">
 
-                <div class="calc" id="calculateur" role="group" aria-labelledby="calc-title">
-                    <div class="calc__head">
-                        <h2 id="calc-title">Où va le prix de chaque vente</h2>
-                        <p class="calc__hint">Valeurs d'exemple : remplacez-les par les vôtres.</p>
-                    </div>
+      <!-- ===== Accueil / Tableau de bord ===== -->
+      <section class="page" data-page="accueil" hidden>
+        <header class="page-head">
+          <div><h1 tabindex="-1">Tableau de bord</h1><p class="lede">Vue globale des performances publicitaires et indicateurs clés</p></div>
+          <a class="btn btn-primary" href="#/nouveau"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg>Nouveau test publicitaire</a>
+        </header>
 
-                    <div class="bar" aria-hidden="true">
-                        <span class="bar__seg bar__seg--c" id="seg-c"></span>
-                        <span class="bar__seg bar__seg--l" id="seg-l"></span>
-                        <span class="bar__seg bar__seg--f" id="seg-f"></span>
-                        <span class="bar__seg bar__seg--a" id="seg-a"></span>
-                        <span class="bar__seg bar__seg--m" id="seg-m"></span>
-                    </div>
-                    <ul class="legend" id="legend">
-                        <li><i class="sw sw--c"></i><span>Coût du produit</span><b id="lg-c">—</b></li>
-                        <li><i class="sw sw--l"></i><span>Livraison</span><b id="lg-l">—</b></li>
-                        <li><i class="sw sw--f"></i><span>Frais de paiement</span><b id="lg-f">—</b></li>
-                        <li><i class="sw sw--a"></i><span>Autres charges</span><b id="lg-a">—</b></li>
-                        <li><i class="sw sw--m"></i><span>Marge avant publicité</span><b id="lg-m">—</b></li>
-                    </ul>
-
-                    <div class="results" aria-live="polite">
-                        <div class="results__main">
-                            <span class="results__label">CAC maximal</span>
-                            <strong class="results__value" id="res-cac">—</strong>
-                            <span class="results__sub">C'est le plus que vous pouvez payer pour une commande sans perdre d'argent.</span>
-                        </div>
-                        <dl class="results__list">
-                            <div><dt>Marge avant publicité</dt><dd id="res-m">—</dd></div>
-                            <div><dt>ROAS de rentabilité</dt><dd id="res-roas">—</dd></div>
-                            <div><dt>Commandes pour couvrir le budget</dt><dd id="res-seuil">—</dd></div>
-                            <div class="is-optional" id="row-cacreel" hidden><dt>CAC obtenu</dt><dd id="res-cacreel">—</dd></div>
-                            <div class="is-optional" id="row-net" hidden><dt>Marge nette du test</dt><dd id="res-net">—</dd></div>
-                        </dl>
-                        <p class="results__msg" id="res-msg" hidden></p>
-                        <p class="results__badge"><span class="badge badge--est">Estimé</span> Calculé à partir de vos saisies, sans source externe.</p>
-                    </div>
-
-                    <form class="fields" id="form" novalidate autocomplete="off">
-                        <div class="field field--wide">
-                            <label for="devise">Devise d'affichage</label>
-                            <select id="devise">
-                                <option value="EUR">Euro (EUR)</option>
-                                <option value="XAF">Franc CFA d'Afrique centrale (XAF)</option>
-                                <option value="XOF">Franc CFA d'Afrique de l'Ouest (XOF)</option>
-                                <option value="MAD">Dirham marocain (MAD)</option>
-                                <option value="USD">Dollar américain (USD)</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="p">Prix de vente</label>
-                            <input id="p" inputmode="decimal" value="29,90">
-                        </div>
-                        <div class="field">
-                            <label for="c">Coût du produit</label>
-                            <input id="c" inputmode="decimal" value="8">
-                        </div>
-                        <div class="field">
-                            <label for="l">Livraison</label>
-                            <input id="l" inputmode="decimal" value="3,50">
-                        </div>
-                        <div class="field">
-                            <label for="a">Autres charges</label>
-                            <input id="a" inputmode="decimal" value="1">
-                        </div>
-                        <div class="field">
-                            <label for="t">Frais de paiement, en&nbsp;%</label>
-                            <input id="t" inputmode="decimal" value="2,9">
-                        </div>
-                        <div class="field">
-                            <label for="f">Frais fixes par commande</label>
-                            <input id="f" inputmode="decimal" value="0,30">
-                        </div>
-                        <div class="field">
-                            <label for="d">Budget du test</label>
-                            <input id="d" inputmode="decimal" value="150">
-                        </div>
-                        <div class="field">
-                            <label for="n">Commandes payées <span class="opt">(facultatif)</span></label>
-                            <input id="n" inputmode="numeric" placeholder="ex. 12">
-                        </div>
-                        <p class="field field--wide note">La devise ne change que l'affichage. Saisissez tous vos montants dans la même devise.</p>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- Parcours : une vraie séquence -->
-        <section class="section" id="parcours" aria-labelledby="parcours-title">
-            <div class="wrap split">
-                <div class="split__head">
-                    <h2 id="parcours-title">Du choix du produit au verdict</h2>
-                    <p>Cinq étapes, dans cet ordre. Vous gardez la main sur votre budget et vos campagnes à chaque étape.</p>
-                </div>
-                <ol class="steps">
-                    <li>
-                        <h3>Choisir un produit</h3>
-                        <p>Comparez des pays, des niches et des produits. Chaque indicateur affiche sa provenance. Au départ, ces listes reposent sur des données DEMO.</p>
-                    </li>
-                    <li>
-                        <h3>Fixer le seuil de rentabilité</h3>
-                        <p>Prix, coûts, frais et budget : MarketPilot calcule votre marge, votre CAC maximal et votre ROAS de rentabilité.</p>
-                    </li>
-                    <li>
-                        <h3>Lancer la campagne chez vous</h3>
-                        <p>Vous gérez votre publicité sur Meta ou TikTok. MarketPilot ne modifie ni votre budget, ni vos campagnes.</p>
-                    </li>
-                    <li>
-                        <h3>Importer les résultats</h3>
-                        <p>Déposez le fichier CSV de votre campagne et associez ses colonnes. Une colonne manquante n'empêche pas l'analyse : elle apparaît dans les données manquantes.</p>
-                    </li>
-                    <li>
-                        <h3>Lire le diagnostic</h3>
-                        <p>Chaque étape, de l'impression à la livraison, est comparée à un seuil. Vous recevez une recommandation priorisée, avec sa justification.</p>
-                    </li>
-                </ol>
-            </div>
-        </section>
-
-        <!-- Diagnostic : exemple DEMO -->
-        <section class="section section--tint" id="diagnostic" aria-labelledby="diag-title">
-            <div class="wrap split split--reverse">
-                <div class="split__head">
-                    <h2 id="diag-title">Le diagnostic montre où le parcours se casse</h2>
-                    <p>Chaque étape est comparée à un seuil que vous pouvez modifier. Les causes restent des hypothèses tant qu'un test comparatif ne les confirme pas.</p>
-                    <p class="fineprint">Les seuils par défaut sont des points de départ à calibrer. Ce ne sont pas des références de marché.</p>
-                </div>
-
-                <figure class="panel diag" aria-labelledby="diag-cap">
-                    <figcaption class="panel__head" id="diag-cap">
-                        <span>Exemple de test</span>
-                        <span class="badge badge--demo">DEMO</span>
-                    </figcaption>
-                    <p class="diag__legend">La ligne verticale est le seuil. Une barre qui la dépasse est au-dessus du seuil.</p>
-                    <ul class="gauges">
-                        <li class="gauge" style="--fill:70%">
-                            <span class="gauge__name">Clic</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">1,4&nbsp;% <small>seuil 1&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge is-low" style="--fill:37%">
-                            <span class="gauge__name">Visite</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">52&nbsp;% <small>sous le seuil de 70&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge" style="--fill:64%">
-                            <span class="gauge__name">Panier</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">5,1&nbsp;% <small>seuil 4&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge" style="--fill:55%">
-                            <span class="gauge__name">Checkout</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">44&nbsp;% <small>seuil 40&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge" style="--fill:59%">
-                            <span class="gauge__name">Commande</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">47&nbsp;% <small>seuil 40&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge" style="--fill:52%">
-                            <span class="gauge__name">Paiement</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">93&nbsp;% <small>seuil 90&nbsp;%</small></span>
-                        </li>
-                        <li class="gauge" style="--fill:52%">
-                            <span class="gauge__name">Livraison</span>
-                            <span class="gauge__meter"><i></i></span>
-                            <span class="gauge__val">88&nbsp;% <small>seuil 85&nbsp;%</small></span>
-                        </li>
-                    </ul>
-
-                    <div class="verdict">
-                        <p class="verdict__title">Recommandation : modifier</p>
-                        <dl>
-                            <div><dt>Observé</dt><dd>Seuls 52&nbsp;% des clics deviennent des visites, sous le seuil de 70&nbsp;%.</dd></div>
-                            <div><dt>Cause probable, non prouvée</dt><dd>Page lente à charger ou clics involontaires.</dd></div>
-                            <div><dt>Confiance</dt><dd>Faible : 4 commandes payées seulement.</dd></div>
-                            <div><dt>Données manquantes</dt><dd>Vues vidéo.</dd></div>
-                        </dl>
-                    </div>
-                    <p class="fineprint">Chiffres fictifs, créés pour l'exemple.</p>
-                </figure>
-            </div>
-        </section>
-
-        <!-- Données : provenance -->
-        <section class="section" id="donnees" aria-labelledby="data-title">
-            <div class="wrap split">
-                <div class="split__head">
-                    <h2 id="data-title">Chaque chiffre dit d'où il vient</h2>
-                    <p>La source, la date, le pays, la méthode et le niveau de confiance accompagnent chaque donnée. Quatre statuts indiquent comment la lire.</p>
-                    <p>MarketPilot n'invente aucune statistique et ne simule aucune connexion.</p>
-                </div>
-
-                <div class="stack">
-                    <dl class="status">
-                        <div>
-                            <dt><span class="badge badge--ver"><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2 6.5 L5 9.5 L10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifié</span></dt>
-                            <dd>Reçu par une connexion officielle. Aucun chiffre n'a ce statut pour l'instant.</dd>
-                        </div>
-                        <div>
-                            <dt><span class="badge badge--est">Estimé</span></dt>
-                            <dd>Calculé par MarketPilot. La formule est affichée.</dd>
-                        </div>
-                        <div>
-                            <dt><span class="badge badge--imp">Importé</span></dt>
-                            <dd>Fourni par vous dans un fichier CSV. Non vérifié.</dd>
-                        </div>
-                        <div>
-                            <dt><span class="badge badge--demo">DEMO</span></dt>
-                            <dd>Fictif, pour essayer le produit. Jamais mélangé aux données réelles.</dd>
-                        </div>
-                    </dl>
-
-                    <div class="connect">
-                        <h3>Connexions</h3>
-                        <ul>
-                            <li><span>Import CSV</span><b class="state state--on">Actif</b></li>
-                            <li><span>Meta Ads</span><b class="state">Non connecté</b></li>
-                            <li><span>TikTok Ads</span><b class="state">Non connecté</b></li>
-                            <li><span>Shopify</span><b class="state">Non connecté</b></li>
-                            <li><span>WooCommerce</span><b class="state">Non connecté</b></li>
-                        </ul>
-                        <p class="fineprint">Pour chaque connecteur, MarketPilot affiche son état et les étapes pour l'activer.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- État du produit -->
-        <section class="section section--tint" id="etat" aria-labelledby="etat-title">
-            <div class="wrap split">
-                <div class="split__head">
-                    <h2 id="etat-title">Où en est MarketPilot</h2>
-                    <p>Le premier MVP est en construction. Il se concentre sur une promesse : tester un produit en publicité sans deviner.</p>
-                </div>
-                <div class="roadmap">
-                    <div>
-                        <h3>Dans le premier MVP</h3>
-                        <ul>
-                            <li>Compte, espace de travail et rôles</li>
-                            <li>Explorateurs de marchés, de niches et de produits, sur données DEMO</li>
-                            <li>Création d'un test publicitaire et seuil de rentabilité</li>
-                            <li>Import CSV, entonnoir et diagnostic à règles</li>
-                            <li>Badges de provenance et écran des connecteurs</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3>Plus tard</h3>
-                        <ul>
-                            <li>Connexions réelles à Meta Ads, TikTok Ads, Shopify et WooCommerce</li>
-                            <li>Clients, créations publicitaires, fournisseurs, concurrents et ventes</li>
-                            <li>Tendances et prévisions</li>
-                            <li>Copilote IA qui explique les diagnostics</li>
-                            <li>Abonnements et quotas</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="closing">
-            <div class="wrap closing__in">
-                <h2>Votre prochain test <span class="nowrap">est-il</span> rentable sur le papier ?</h2>
-                <a class="btn btn--primary" href="#p" data-focus="p">Refaire le calcul avec mes chiffres</a>
-            </div>
-        </section>
-    </main>
-
-    <footer class="foot">
-        <div class="wrap foot__in">
-            <span>© 2026 MarketPilot</span>
-            <span>Page de présentation d'un produit en construction. Les exemples marqués DEMO sont fictifs.</span>
+        <div class="filters" role="group" aria-label="Filtres du tableau de bord">
+          <label class="filter"><span>Pays</span><select id="f-country"></select><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></label>
+          <label class="filter"><span>Niche</span><select id="f-niche"></select><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></label>
+          <label class="filter"><span>Produit</span><select id="f-product"></select><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></label>
+          <button class="btn-link" id="f-reset" type="button" hidden>Réinitialiser</button>
+          <p class="filters-count" id="f-count" aria-live="polite"></p>
         </div>
-    </footer>
 
-    <script>
-    (function () {
-        var $ = function (id) { return document.getElementById(id); };
+        <div class="banner" role="note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><p><strong>Mode démonstration :</strong> les données affichées sont fictives et fournies à des fins d'évaluation. Aucun compte publicitaire ni aucune boutique n'est connecté.</p></div>
 
-        // Lit un nombre saisi avec virgule ou point. Champ vide : valeur par défaut.
-        function read(id, fallback) {
-            var raw = $(id).value.trim();
-            if (raw === '') return fallback;
-            var n = parseFloat(raw.replace(/\s/g, '').replace(',', '.'));
-            return isFinite(n) ? n : NaN;
-        }
+        <div class="kpi-row">
+          <article class="card kpi" id="kpi-cac" aria-live="polite"></article>
+          <article class="card kpi" id="kpi-diag" aria-live="polite"></article>
+        </div>
 
-        function money(v) {
-            try {
-                return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: $('devise').value }).format(v);
-            } catch (e) {
-                return v.toFixed(2);
-            }
-        }
+        <section class="card" aria-labelledby="home-t">
+          <header class="card-head">
+            <div><h2 id="home-t">Mes tests publicitaires <span class="count" id="home-count"></span></h2><p class="muted">Performances et rentabilité des campagnes</p></div>
+            <a class="link-more" href="#/tests">Voir l'historique complet<svg class="ico" aria-hidden="true"><use href="#i-right"/></svg></a>
+          </header>
+          <div class="table-wrap">
+            <table class="table" id="home-table">
+              <caption class="sr-only">Tests publicitaires, filtrés selon le pays, la niche et le produit</caption>
+              <thead><tr><th scope="col">Produit</th><th scope="col">Pays</th><th scope="col" class="num">Budget</th><th scope="col" class="num">CAC obtenu</th><th scope="col">Recommandation</th><th scope="col">Statut</th></tr></thead>
+              <tbody id="home-body"></tbody>
+            </table>
+          </div>
+          <footer class="card-foot"><span>Aucune source de données connectée.</span><a href="#/connecteurs">Voir les connecteurs</a></footer>
+        </section>
+      </section>
 
-        function dec(v) {
-            return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
-        }
+      <!-- ===== Mes tests ===== -->
+      <section class="page" data-page="tests" hidden>
+        <header class="page-head">
+          <div><h1 tabindex="-1">Mes tests</h1><p class="lede">Tous vos tests publicitaires, avec leur rentabilité et leur recommandation.</p></div>
+          <a class="btn btn-primary" href="#/nouveau"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg>Nouveau test publicitaire</a>
+        </header>
+        <div class="toolbar">
+          <div class="field-inline"><label for="tl-q">Rechercher</label><input id="tl-q" type="search" placeholder="Produit, pays, niche…" autocomplete="off"></div>
+          <div class="field-inline"><label for="tl-reco">Recommandation</label>
+            <select id="tl-reco"><option value="">Toutes</option><option value="continue">Continuer</option><option value="modify">Modifier</option><option value="test">Tester</option><option value="stop">Arrêter</option><option value="wait">En attente</option></select></div>
+          <div class="field-inline"><label for="tl-sort">Trier par</label>
+            <select id="tl-sort"><option value="recent">Plus récents</option><option value="name">Nom</option><option value="cac">CAC obtenu</option><option value="net">Marge nette</option></select></div>
+          <p class="filters-count" id="tl-count" aria-live="polite"></p>
+        </div>
+        <section class="card">
+          <div class="table-wrap">
+            <table class="table" id="tests-table">
+              <caption class="sr-only">Liste complète des tests publicitaires</caption>
+              <thead><tr><th scope="col">Produit</th><th scope="col">Pays</th><th scope="col" class="num">Budget</th><th scope="col" class="num">Dépensé</th><th scope="col" class="num">Commandes</th><th scope="col" class="num">CAC obtenu</th><th scope="col" class="num">Marge nette</th><th scope="col">Recommandation</th><th scope="col">Statut</th></tr></thead>
+              <tbody id="tests-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
 
-        function setBar(id, share) {
-            $(id).style.width = Math.max(share, 0) + '%';
-        }
+      <!-- ===== Nouveau test / modification ===== -->
+      <section class="page" data-page="nouveau" hidden>
+        <header class="page-head">
+          <div><h1 tabindex="-1" id="nt-title">Nouveau test publicitaire</h1><p class="lede" id="nt-lede">Renseignez l'économie du produit : MarketPilot calcule le CAC maximal et le ROAS de rentabilité.</p></div>
+        </header>
+        <div class="form-grid">
+          <form id="form-test" novalidate class="card form-card">
+            <p class="form-error" id="nt-summary" role="alert" tabindex="-1" hidden></p>
+            <fieldset>
+              <legend>Produit et marché</legend>
+              <div class="grid-2">
+                <div class="field span-2"><label for="nt-name">Nom du produit</label><input id="nt-name" type="text" maxlength="80" placeholder="Ex. : Lampe de bureau pliable" required aria-describedby="nt-name-err"><p class="field-error" id="nt-name-err" hidden></p></div>
+                <div class="field"><label for="nt-niche">Niche</label><select id="nt-niche"></select></div>
+                <div class="field"><label for="nt-country">Pays du test</label><select id="nt-country"></select><p class="hint" id="nt-cur-hint"></p></div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Économie unitaire <span class="legend-note" id="nt-cur">(EUR)</span></legend>
+              <div class="grid-2">
+                <div class="field"><label for="nt-price">Prix de vente</label><input id="nt-price" type="number" inputmode="decimal" step="0.01" min="0" placeholder="29,90" required aria-describedby="nt-price-err"><p class="field-error" id="nt-price-err" hidden></p></div>
+                <div class="field"><label for="nt-cost">Coût produit</label><input id="nt-cost" type="number" inputmode="decimal" step="0.01" min="0" placeholder="8,00" required aria-describedby="nt-cost-err"><p class="field-error" id="nt-cost-err" hidden></p></div>
+                <div class="field"><label for="nt-ship">Livraison (coût pour vous)</label><input id="nt-ship" type="number" inputmode="decimal" step="0.01" min="0" placeholder="3,50" aria-describedby="nt-ship-err"><p class="field-error" id="nt-ship-err" hidden></p></div>
+                <div class="field"><label for="nt-other">Autres charges par commande</label><input id="nt-other" type="number" inputmode="decimal" step="0.01" min="0" placeholder="1,00" aria-describedby="nt-other-err"><p class="field-error" id="nt-other-err" hidden></p></div>
+                <div class="field"><label for="nt-feepct">Frais de paiement (%)</label><input id="nt-feepct" type="number" inputmode="decimal" step="0.1" min="0" max="30" value="2.9" aria-describedby="nt-feepct-err"><p class="field-error" id="nt-feepct-err" hidden></p></div>
+                <div class="field"><label for="nt-feefix">Frais fixes par paiement</label><input id="nt-feefix" type="number" inputmode="decimal" step="0.01" min="0" value="0.30" aria-describedby="nt-feefix-err"><p class="field-error" id="nt-feefix-err" hidden></p></div>
+              </div>
+              <p class="hint">Un seul pays et une seule devise par test : aucune conversion n'est appliquée.</p>
+            </fieldset>
+            <fieldset>
+              <legend>Budget et durée</legend>
+              <div class="grid-2">
+                <div class="field"><label for="nt-budget">Budget total du test</label><input id="nt-budget" type="number" inputmode="decimal" step="1" min="0" placeholder="300" required aria-describedby="nt-budget-err"><p class="field-error" id="nt-budget-err" hidden></p></div>
+                <div class="field"><label for="nt-days">Durée (jours)</label><input id="nt-days" type="number" inputmode="numeric" step="1" min="1" max="90" value="7" required aria-describedby="nt-days-err"><p class="field-error" id="nt-days-err" hidden></p></div>
+              </div>
+            </fieldset>
+            <div class="banner"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><p><strong>Connexions :</strong> compte publicitaire (Meta, TikTok) et boutique (Shopify, WooCommerce) non connectés. Vous pourrez saisir vos résultats à la main sur la fiche du test. <a href="#/connecteurs">Voir les connecteurs</a></p></div>
+            <div class="form-actions"><a class="btn btn-secondary" href="#/tests" id="nt-cancel">Annuler</a><button class="btn btn-primary" type="submit" id="nt-submit">Créer le test</button></div>
+          </form>
 
-        function showMsg(text, kind) {
-            var el = $('res-msg');
-            if (!text) { el.hidden = true; el.textContent = ''; return; }
-            el.hidden = false;
-            el.textContent = text;
-            el.className = 'results__msg results__msg--' + (kind || 'info');
-        }
+          <aside class="card calc" aria-labelledby="calc-t" aria-live="polite">
+            <header class="calc-head"><h2 id="calc-t" class="eyebrow">Rentabilité estimée</h2><span class="badge badge-est">Estimé</span></header>
+            <dl class="calc-list" id="calc-out"></dl>
+            <p class="hint">m = prix − coût − livraison − frais de paiement − autres charges. CAC maximal = m. ROAS de rentabilité = prix ÷ m.</p>
+          </aside>
+        </div>
+      </section>
 
-        function reset() {
-            ['res-cac', 'res-m', 'res-roas', 'res-seuil', 'lg-c', 'lg-l', 'lg-f', 'lg-a', 'lg-m'].forEach(function (id) {
-                $(id).textContent = '—';
-            });
-            $('row-cacreel').hidden = true;
-            $('row-net').hidden = true;
-            ['seg-c', 'seg-l', 'seg-f', 'seg-a', 'seg-m'].forEach(function (id) { setBar(id, 0); });
-        }
+      <!-- ===== Pages générées par le script (fiche test, diagnostics, favoris, modules à venir) ===== -->
+      <section class="page" data-page="dyn" hidden><div id="dyn"></div></section>
 
-        function compute() {
-            var p = read('p', NaN);
-            var c = read('c', 0), l = read('l', 0), a = read('a', 0);
-            var t = read('t', 0), f = read('f', 0);
-            var d = read('d', 0);
-            var n = read('n', 0);
+      <!-- ===== Connecteurs ===== -->
+      <section class="page" data-page="connecteurs" hidden>
+        <header class="page-head"><div><h1 tabindex="-1">Connecteurs</h1><p class="lede">Reliez vos comptes publicitaires et votre boutique via leurs API officielles.</p></div></header>
+        <div class="banner warn" role="note"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg><p><strong>Aucun connecteur n'est actif.</strong> Les connexions réelles nécessitent l'accès aux API officielles de chaque plateforme. MarketPilot ne simule jamais une connexion : tant qu'un accès n'est pas obtenu, le statut reste « Non connecté ».</p></div>
+        <div class="conn-grid">
+          <article class="card conn">
+            <header><span class="mono" aria-hidden="true">M</span><div><h2>Meta Ads</h2><p class="muted">Meta Marketing API</p></div><span class="pill pill-off">Non connecté</span></header>
+            <p>Dépenses, impressions, CPM, CTR, CPC, clics et vues vidéo de vos campagnes.</p>
+            <details><summary>Étapes pour l'activer</summary><ol><li>Créer une application dans Meta for Developers.</li><li>Demander l'accès à la Marketing API (revue Meta).</li><li>Autoriser le compte publicitaire (consentement OAuth).</li><li>Choisir la campagne à suivre.</li></ol></details>
+          </article>
+          <article class="card conn">
+            <header><span class="mono" aria-hidden="true">T</span><div><h2>TikTok Ads</h2><p class="muted">TikTok Marketing API</p></div><span class="pill pill-off">Non connecté</span></header>
+            <p>Mêmes indicateurs que Meta pour vos campagnes TikTok.</p>
+            <details><summary>Étapes pour l'activer</summary><ol><li>Créer un compte développeur TikTok for Business.</li><li>Demander l'accès à la Marketing API.</li><li>Autoriser le compte publicitaire.</li><li>Choisir la campagne à suivre.</li></ol></details>
+          </article>
+          <article class="card conn">
+            <header><span class="mono" aria-hidden="true">S</span><div><h2>Shopify</h2><p class="muted">API Admin Shopify</p></div><span class="pill pill-off">Non connecté</span></header>
+            <p>Commandes, paiements et livraisons pour mesurer les ventes réelles.</p>
+            <details><summary>Étapes pour l'activer</summary><ol><li>Créer une application personnalisée dans votre boutique.</li><li>Accorder la lecture des commandes.</li><li>Renseigner la connexion dans MarketPilot.</li></ol></details>
+          </article>
+          <article class="card conn">
+            <header><span class="mono" aria-hidden="true">W</span><div><h2>WooCommerce</h2><p class="muted">API REST WooCommerce</p></div><span class="pill pill-off">Non connecté</span></header>
+            <p>Commandes et paiements de votre boutique WordPress.</p>
+            <details><summary>Étapes pour l'activer</summary><ol><li>Générer des clés API (lecture seule) dans WooCommerce.</li><li>Renseigner la connexion dans MarketPilot.</li></ol></details>
+          </article>
+        </div>
+      </section>
 
-            var all = [p, c, l, a, t, f, d, n];
-            if (all.some(function (x) { return isNaN(x); })) {
-                reset();
-                showMsg('Un champ contient autre chose qu\'un nombre. Corrigez-le pour voir le résultat.', 'warn');
-                return;
-            }
-            if (!(p > 0)) {
-                reset();
-                showMsg('Saisissez un prix de vente supérieur à zéro.', 'warn');
-                return;
-            }
-            if ([c, l, a, t, f, d, n].some(function (x) { return x < 0; }) || t > 100) {
-                reset();
-                showMsg('Les montants ne peuvent pas être négatifs, et les frais de paiement vont de 0 à 100 %.', 'warn');
-                return;
-            }
+      <!-- ===== Paramètres ===== -->
+      <section class="page" data-page="parametres" hidden>
+        <header class="page-head"><div><h1 tabindex="-1">Paramètres</h1><p class="lede">Profil, apparence et données enregistrées sur cet appareil.</p></div></header>
+        <div class="settings">
+          <form class="card set-card" id="form-profile" novalidate>
+            <h2>Profil et espace de travail</h2>
+            <div class="field"><label for="p-name">Nom complet</label><input id="p-name" type="text" autocomplete="name" maxlength="80"></div>
+            <div class="field"><label for="p-mail">E-mail</label><input id="p-mail" type="email" readonly aria-describedby="p-mail-h"><p class="hint" id="p-mail-h">Identifiant du compte local, non modifiable dans le prototype.</p></div>
+            <div class="field"><label for="p-ws">Nom de l'espace de travail</label><input id="p-ws" type="text" maxlength="40"></div>
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Enregistrer</button></div>
+          </form>
 
-            var fees = p * (t / 100) + f;          // frais de paiement par commande
-            var m = p - c - l - fees - a;           // marge avant publicité
-            var costs = c + l + fees + a;
-            var total = Math.max(p, costs);
+          <section class="card set-card" aria-labelledby="set-app">
+            <h2 id="set-app">Apparence et langue</h2>
+            <fieldset class="radio-row"><legend>Thème</legend>
+              <label><input type="radio" name="theme" value="light"> Clair</label>
+              <label><input type="radio" name="theme" value="dark"> Sombre</label>
+              <label><input type="radio" name="theme" value="auto"> Système</label>
+            </fieldset>
+            <div class="field"><label for="p-lang">Langue</label><select id="p-lang"><option>Français</option><option disabled>English (bientôt)</option></select></div>
+          </section>
 
-            // Barre : où va le prix de vente
-            setBar('seg-c', c / total * 100);
-            setBar('seg-l', l / total * 100);
-            setBar('seg-f', fees / total * 100);
-            setBar('seg-a', a / total * 100);
-            setBar('seg-m', Math.max(m, 0) / total * 100);
-            $('lg-c').textContent = money(c);
-            $('lg-l').textContent = money(l);
-            $('lg-f').textContent = money(fees);
-            $('lg-a').textContent = money(a);
-            $('lg-m').textContent = money(m);
+          <section class="card set-card" aria-labelledby="set-data">
+            <h2 id="set-data">Données sur cet appareil</h2>
+            <p class="muted">Vos tests et votre compte sont conservés dans ce navigateur (stockage local). Ils ne sont envoyés nulle part.</p>
+            <div class="btn-row">
+              <button class="btn btn-secondary" type="button" id="btn-export"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>Exporter mes tests (JSON)</button>
+              <button class="btn btn-danger-ghost" type="button" id="btn-clear-tests">Supprimer mes tests</button>
+              <button class="btn btn-danger-ghost" type="button" id="btn-clear-all">Supprimer mon compte local</button>
+            </div>
+          </section>
+          <section class="card set-card" aria-labelledby="set-plan">
+            <h2 id="set-plan">Abonnement</h2>
+            <p>Plan <strong>Free</strong> (prototype). Les offres Starter, Pro, Business et Enterprise et leurs quotas seront ajoutés avec la facturation.</p>
+          </section>
+        </div>
+      </section>
 
-            $('res-m').textContent = money(m);
-            $('row-cacreel').hidden = true;
-            $('row-net').hidden = true;
-            $('res-net').className = '';
+    </main>
+  </div>
+</div>
 
-            if (m <= 0) {
-                $('res-cac').textContent = '—';
-                $('res-roas').textContent = '—';
-                $('res-seuil').textContent = '—';
-                showMsg('La marge est nulle ou négative : aucun nombre de commandes ne rend ce test rentable. Baissez vos coûts ou augmentez le prix.', 'bad');
-                return;
-            }
+<dialog id="dlg" class="dlg" aria-labelledby="dlg-title">
+  <form method="dialog">
+    <h2 id="dlg-title">Confirmer</h2>
+    <p id="dlg-text"></p>
+    <div class="form-actions"><button class="btn btn-secondary" value="cancel" id="dlg-cancel">Annuler</button><button class="btn btn-danger" value="ok" id="dlg-ok">Supprimer</button></div>
+  </form>
+</dialog>
 
-            showMsg('');
-            $('res-cac').textContent = money(m);                    // CAC maximal = m
-            $('res-roas').textContent = dec(p / m);                 // ROAS de rentabilité = p / m
-            if (d > 0) {
-                var need = Math.ceil(d / m - 1e-9);                 // commandes pour couvrir le budget
-                $('res-seuil').textContent = need + (need > 1 ? ' commandes' : ' commande');
-            } else {
-                $('res-seuil').textContent = 'Saisissez un budget';
-            }
+<script>
+(function () {
+  'use strict';
 
-            if (n > 0 && d > 0) {
-                var net = n * m - d;                                // marge nette = N·m − D
-                $('row-cacreel').hidden = false;
-                $('row-net').hidden = false;
-                $('res-cacreel').textContent = money(d / n) + (d / n <= m ? ' (sous le maximum)' : ' (au-dessus du maximum)');
-                $('res-net').textContent = (net > 0 ? '+' : '') + money(net);
-                $('res-net').className = net >= 0 ? 'is-gain' : 'is-loss';
-            }
-        }
+  /* ============ Utilitaires ============ */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ico = function (n) { return '<svg class="ico" aria-hidden="true"><use href="#i-' + n + '"/></svg>'; };
 
-        $('form').addEventListener('input', compute);
-        $('form').addEventListener('submit', function (e) { e.preventDefault(); });
+  // Stockage local (avec repli en mémoire si le navigateur le bloque)
+  var KEYS = { theme: 'mp.theme', session: 'mp.session', profile: 'mp.profile', tests: 'mp.tests', favs: 'mp.favs' };
+  var mem = {};
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem(k); if (v !== null) return JSON.parse(v); } catch (e) {} return k in mem ? mem[k] : d; },
+    set: function (k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del: function (k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
+  };
 
-        // Les boutons « Saisir mes chiffres » placent le curseur dans le premier champ.
-        Array.prototype.forEach.call(document.querySelectorAll('[data-focus]'), function (a) {
-            a.addEventListener('click', function () {
-                var target = $(a.getAttribute('data-focus'));
-                setTimeout(function () { target.focus({ preventScroll: true }); }, 250);
-            });
-        });
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3600);
+  }
+  function confirmDialog(title, text, okLabel, onOk) {
+    var d = $('#dlg');
+    $('#dlg-title').textContent = title; $('#dlg-text').textContent = text; $('#dlg-ok').textContent = okLabel || 'Supprimer';
+    if (typeof d.showModal !== 'function') { if (window.confirm(title + '\n' + text)) onOk(); return; }
+    d.returnValue = ''; d.showModal();
+    d.onclose = function () { if (d.returnValue === 'ok') onOk(); };
+  }
 
-        // Au chargement, les segments s'étirent une fois depuis zéro.
-        reset();
-        requestAnimationFrame(function () { requestAnimationFrame(compute); });
-    })();
-    </script>
+  /* ============ Données de référence ============ */
+  var COUNTRIES = {
+    FR: ['France', 'EUR'], DE: ['Allemagne', 'EUR'], ES: ['Espagne', 'EUR'], IT: ['Italie', 'EUR'], BE: ['Belgique', 'EUR'], NL: ['Pays-Bas', 'EUR'],
+    GB: ['Royaume-Uni', 'GBP'], US: ['États-Unis', 'USD'], CA: ['Canada', 'CAD'], CH: ['Suisse', 'CHF'], MA: ['Maroc', 'MAD'],
+    SN: ['Sénégal', 'XOF'], CI: ['Côte d’Ivoire', 'XOF'], CM: ['Cameroun', 'XAF'], CG: ['Congo', 'XAF'], BR: ['Brésil', 'BRL']
+  };
+  var NICHES = ['Bien-être & posture', 'Maison & entretien', 'Maison connectée', 'Sport & plein air', 'Beauté & soins', 'Animaux', 'Électronique grand public', 'Autre'];
+  var RECO = {
+    continue: { label: 'Continuer', tag: 'Sur la bonne voie', cls: 'ok' },
+    modify: { label: 'Modifier', tag: 'Attention requise', cls: 'warn' },
+    test: { label: 'Tester', tag: 'Données limitées', cls: 'info' },
+    stop: { label: 'Arrêter', tag: 'Action requise', cls: 'bad' },
+    wait: { label: 'En attente', tag: 'Aucun résultat', cls: 'off' }
+  };
+  // Seuils de démonstration (indicatifs, à calibrer avec vos propres données)
+  var STEPS = [
+    { key: 'visits', from: 'clicks', min: 70, label: 'Clic → visite', short: 'des clics deviennent des visites',
+      causes: ['page lente à charger', 'clics accidentels', 'redirections ou blocage du suivi'],
+      todo: ['Mesurer le temps de chargement de la page produit sur mobile.', 'Vérifier que le lien de la publicité mène à la bonne page, sans redirection inutile.'] },
+    { key: 'carts', from: 'visits', min: 5, label: 'Visite → panier', short: 'des visites ajoutent un produit au panier',
+      causes: ['offre ou prix peu convaincants', 'page produit peu rassurante (photos, avis, livraison)'],
+      todo: ['Revoir photos, avis et explications de livraison sur la page produit.', 'Vérifier que le prix annoncé dans la publicité correspond à la page.'] },
+    { key: 'checkouts', from: 'carts', min: 40, label: 'Panier → paiement', short: 'des paniers atteignent le paiement',
+      causes: ['frais de livraison découverts tard', 'tunnel d’achat trop long'],
+      todo: ['Afficher les frais de livraison plus tôt.', 'Réduire le nombre d’étapes avant le paiement.'] },
+    { key: 'orders', from: 'checkouts', min: 30, label: 'Paiement → commande', short: 'des paiements aboutissent à une commande',
+      causes: ['moyens de paiement manquants', 'erreurs ou refus de paiement'],
+      todo: ['Tester chaque moyen de paiement de bout en bout.', 'Ajouter un moyen de paiement courant dans le pays ciblé.'] }
+  ];
+  var DEMO = [
+    { id: 'd1', demo: true, name: 'Correcteur de posture', niche: 'Bien-être & posture', country: 'FR', price: 29.9, cost: 8, ship: 3.5, feePct: 2.9, feeFix: 0.3, other: 1, budget: 450, days: 14, updated: '2026-11-12T10:20:00',
+      results: { spent: 444, clicks: 1210, visits: 944, carts: 130, checkouts: 64, orders: 30 }, daily: [11.9, 12.6, 12.2, 13.4, 13.1, 14.2, 14.8] },
+    { id: 'd2', demo: true, name: 'Brosse nettoyante ultrasonique', niche: 'Maison & entretien', country: 'DE', price: 39.9, cost: 14, ship: 4.5, feePct: 2.9, feeFix: 0.3, other: 1, budget: 320, days: 10, updated: '2026-11-13T09:40:00',
+      results: { spent: 301, clicks: 1840, visits: 957, carts: 96, checkouts: 40, orders: 14 }, daily: [18.2, 19.5, 20.1, 19.8, 21.0, 21.9, 21.5] },
+    { id: 'd3', demo: true, name: 'Lampe réveil lever de soleil', niche: 'Maison connectée', country: 'US', price: 34.9, cost: 11, ship: 5, feePct: 2.9, feeFix: 0.3, other: 1, budget: 180, days: 7, updated: '2026-11-10T16:05:00',
+      results: { spent: 36.3, clicks: 260, visits: 196, carts: 21, checkouts: 9, orders: 3 }, daily: [10.4, 13.2, 12.1] },
+    { id: 'd4', demo: true, name: 'Gourde isotherme connectée', niche: 'Sport & plein air', country: 'GB', price: 24.9, cost: 9, ship: 3.5, feePct: 2.9, feeFix: 0.3, other: 1, budget: 290, days: 10, updated: '2026-11-11T18:30:00',
+      results: { spent: 284, clicks: 1520, visits: 1150, carts: 118, checkouts: 52, orders: 10 }, daily: [24.1, 25.5, 26.8, 27.0, 28.9, 28.0, 28.4] }
+  ];
+
+  /* ============ Formats ============ */
+  function money(n, cc) {
+    var cur = (COUNTRIES[cc] || [0, 'EUR'])[1];
+    try { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).format(n); }
+    catch (e) { return n.toFixed(2) + ' ' + cur; }
+  }
+  function num(n, d) { return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: d == null ? 2 : d, minimumFractionDigits: d == null ? 0 : d }).format(n); }
+  function pct(n) { return num(n, 0) + ' %'; }
+  function dateFr(iso) { try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
+
+  /* ============ Calculs de rentabilité et diagnostic ============ */
+  function calc(t) {
+    var fee = t.price * (t.feePct / 100) + t.feeFix;
+    var m = t.price - t.cost - t.ship - fee - t.other;
+    var ok = m > 0;
+    return { fee: fee, m: m, ok: ok, cacMax: ok ? m : 0, roas: ok ? t.price / m : null, breakeven: ok && t.budget > 0 ? Math.ceil(t.budget / m) : null };
+  }
+  function diagnose(t) {
+    var c = calc(t), r = t.results, d = { reco: 'wait', c: c, conf: null, headline: '', reasons: [], causes: [], todo: [], avoid: [], rates: [], friction: null, cac: null, net: null };
+    if (!r) {
+      d.headline = 'Aucun résultat saisi pour ce test.';
+      d.todo = ['Saisissez les résultats de votre campagne (dépenses, clics, commandes…) ci-dessous.', 'Les connecteurs Meta, TikTok et boutique arriveront avec l’accès aux API.'];
+      return d;
+    }
+    var orders = r.orders, spent = r.spent;
+    d.cac = orders > 0 ? spent / orders : null;
+    d.net = orders * c.m - spent;
+    d.conf = orders < 5 ? 'faible' : orders < 20 ? 'moyenne' : 'élevée';
+    STEPS.forEach(function (s) {
+      var den = r[s.from], val = r[s.key];
+      if (den >= 30) { var rate = val / den * 100; d.rates.push({ s: s, rate: rate, below: rate < s.min }); }
+    });
+    var flagged = d.rates.filter(function (x) { return x.below; }).sort(function (a, b) { return a.rate / a.s.min - b.rate / b.s.min; });
+    d.friction = flagged.length ? flagged[0] : null;
+    var fm = function (v) { return money(v, t.country); };
+    if (!c.ok) {
+      d.reco = 'modify'; d.headline = 'Marge unitaire de ' + fm(c.m) + ' : chaque vente perd de l’argent avant même la publicité.';
+      d.todo = ['Revoir le prix de vente, le coût produit ou la livraison.']; d.avoid = ['Ne pas dépenser davantage en publicité avec cette économie unitaire.'];
+    } else if (orders === 0 && spent >= 3 * c.cacMax) {
+      d.reco = 'stop'; d.headline = fm(spent) + ' dépensés sans commande, soit plus de 3 fois le CAC maximal (' + fm(c.cacMax) + ').';
+    } else if (orders === 0) {
+      d.reco = 'test'; d.headline = 'Aucune commande pour l’instant : trop tôt pour conclure.';
+    } else if (orders >= 5 && d.cac >= 2 * c.cacMax) {
+      d.reco = 'stop'; d.headline = 'CAC de ' + fm(d.cac) + ', plus de 2 fois le maximum rentable (' + fm(c.cacMax) + ').';
+    } else if (d.cac > c.cacMax) {
+      if (orders < 5) { d.reco = 'test'; d.headline = 'CAC actuel de ' + fm(d.cac) + ' au-dessus du maximum (' + fm(c.cacMax) + '), mais seulement ' + orders + ' commande' + (orders > 1 ? 's' : '') + '.'; }
+      else { d.reco = 'modify'; d.headline = 'CAC de ' + fm(d.cac) + ' au-dessus du maximum rentable (' + fm(c.cacMax) + ').'; }
+    } else if (orders < 5) {
+      d.reco = 'test'; d.headline = 'Seulement ' + orders + ' commande' + (orders > 1 ? 's' : '') + ' : données insuffisantes pour conclure.';
+    } else {
+      d.reco = 'continue'; d.headline = 'Le CAC (' + fm(d.cac) + ') est sous le CAC maximal (' + fm(c.cacMax) + ').';
+    }
+    if (d.reco === 'modify' && d.friction) d.headline = 'Seuls ' + pct(d.friction.rate) + ' ' + d.friction.s.short + ', sous le seuil de ' + pct(d.friction.s.min) + '.';
+    // Raisons
+    if (c.ok && d.cac != null) d.reasons.push('CAC obtenu ' + fm(d.cac) + ' pour un CAC maximal de ' + fm(c.cacMax) + ' (ROAS de rentabilité ' + num(c.roas, 2) + ').');
+    d.reasons.push('Marge nette estimée : ' + fm(d.net) + ' sur ' + orders + ' commande' + (orders > 1 ? 's' : '') + '.');
+    d.reasons.push('Confiance ' + d.conf + ' (' + orders + ' commande' + (orders > 1 ? 's' : '') + ' : < 5 faible, 5 à 19 moyenne, ≥ 20 élevée).');
+    if (spent >= t.budget) d.reasons.push('Le budget prévu est entièrement consommé.');
+    if (d.friction) {
+      d.reasons.push('Point de friction : ' + d.friction.s.label + ' à ' + pct(d.friction.rate) + ' (seuil ' + pct(d.friction.s.min) + ').');
+      d.causes = d.friction.s.causes.slice();
+    }
+    // Actions
+    var T = {
+      continue: { todo: ['Poursuivre le test jusqu’au budget prévu.', 'Surveiller le CAC quotidien : il doit rester sous ' + fm(c.cacMax) + '.'], avoid: ['Ne pas doubler le budget d’un coup : augmentez par paliers et revérifiez le CAC.'] },
+      modify: { todo: d.friction ? d.friction.s.todo.slice() : ['Revoir le prix, le coût produit ou la livraison, ou tester une autre création.'], avoid: ['Ne pas augmenter le budget tant que le point de friction n’est pas corrigé.', 'Ne changer qu’un élément à la fois pour savoir ce qui a eu un effet.'] },
+      stop: { todo: ['Mettre la campagne en pause (à confirmer dans votre compte publicitaire).', 'Revoir le produit, le prix ou l’offre avant tout nouveau test.'], avoid: ['Ne pas relancer le même test avec le même budget.'] },
+      test: { todo: ['Continuer jusqu’à 5 commandes au moins avant de conclure.', 'Arrêter si les dépenses atteignent ' + fm(3 * c.cacMax) + ' sans commande.'], avoid: ['Ne pas modifier le budget ni tirer de conclusion sur si peu de données.'] }
+    };
+    if (T[d.reco] && !d.todo.length) { d.todo = T[d.reco].todo; d.avoid = T[d.reco].avoid; }
+    return d;
+  }
+  function rowInfo(t) { var c = calc(t), d = diagnose(t); return { c: c, d: d, cac: d.cac, net: d.net }; }
+
+  /* ============ État ============ */
+  function userTests() { var t = store.get(KEYS.tests, []); return Array.isArray(t) ? t : []; }
+  function saveUserTests(a) { store.set(KEYS.tests, a); }
+  function allTests() { return userTests().slice().sort(function (a, b) { return (b.updated || '') < (a.updated || '') ? -1 : 1; }).concat(DEMO); }
+  function findTest(id) { return allTests().filter(function (t) { return t.id === id; })[0]; }
+  function favs() { var f = store.get(KEYS.favs, []); return Array.isArray(f) ? f : []; }
+  function getSession() { return store.get(KEYS.session, null); }
+  function getProfile() { return store.get(KEYS.profile, null); }
+  function displayName() { var s = getSession(); return s ? (s.guest ? 'Invité' : s.name || 'Utilisateur') : ''; }
+  function initials(n) { var p = String(n || '').trim().split(/\s+/).filter(Boolean); return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase(); }
+
+  /* ============ Éléments d'affichage ============ */
+  function recoPill(key) { var r = RECO[key]; return '<span class="pill pill-' + r.cls + '"><span class="dot" aria-hidden="true"></span>' + r.label + '</span>'; }
+  function statusBadge(t) { return t.demo ? '<span class="badge badge-demo" title="Données fictives de démonstration">DEMO</span>' : '<span class="badge badge-est" title="Calculé à partir des valeurs que vous avez saisies, non vérifié">Estimé</span>'; }
+  function countryCell(cc) { return '<span class="cc">' + cc + '</span> ' + esc((COUNTRIES[cc] || [cc])[0]); }
+
+  function sparkLine(vals, label) {
+    var w = 220, h = 70, p = 6, n = vals.length, lo = Math.min.apply(null, vals) * 0.9, hi = Math.max.apply(null, vals) * 1.05;
+    var X = function (i) { return n === 1 ? w / 2 : p + i * (w - 2 * p) / (n - 1); }, Y = function (v) { return h - p - (v - lo) / (hi - lo || 1) * (h - 2 * p); };
+    var pts = vals.map(function (v, i) { return X(i).toFixed(1) + ',' + Y(v).toFixed(1); });
+    var line = 'M' + pts.join(' L'), area = line + ' L' + X(n - 1).toFixed(1) + ',' + h + ' L' + X(0).toFixed(1) + ',' + h + ' Z';
+    var bw = Math.min(26, (w - 2 * p) / n - 6);
+    var bars = vals.map(function (v, i) {
+      var bh = Math.max(6, (v - lo) / (hi - lo || 1) * (h - 10) + 6), x = p + i * ((w - 2 * p) / n) + ((w - 2 * p) / n - bw) / 2;
+      return '<rect x="' + x.toFixed(1) + '" y="' + (h - bh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="4" opacity="' + (0.25 + 0.75 * (n === 1 ? 1 : i / (n - 1))).toFixed(2) + '"/>';
+    }).join('');
+    return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(label) + '" preserveAspectRatio="none">' +
+      '<g class="spark-line"><path class="area" d="' + area + '"/><path class="stroke" d="' + line + '"/><circle cx="' + X(n - 1).toFixed(1) + '" cy="' + Y(vals[n - 1]).toFixed(1) + '" r="4"/></g>' +
+      '<g class="spark-bars">' + bars + '</g></svg>';
+  }
+
+  function funnelBar(x) {
+    var w = Math.max(0, Math.min(100, x.rate)), tick = Math.min(100, x.s.min);
+    return '<div class="rate' + (x.below ? ' below' : '') + '"><div class="rate-top"><span>' + x.s.label + '</span><strong>' + pct(x.rate) + ' <span class="rate-min">/ seuil ' + pct(x.s.min) + '</span>' + (x.below ? ' <span class="sr-only">sous le seuil</span>' : '') + '</strong></div>' +
+      '<div class="bar" aria-hidden="true"><span class="fill" style="width:' + w + '%"></span><span class="tick" style="left:' + tick + '%"></span></div></div>';
+  }
+
+  /* ============ Accueil ============ */
+  var filt = { country: '', niche: '', product: '' };
+  function fillSelect(sel, all, values, labelFn, cur) {
+    sel.innerHTML = '<option value="">' + all + '</option>' + values.map(function (v) { return '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(labelFn ? labelFn(v) : v) + '</option>'; }).join('');
+  }
+  function uniq(a) { return a.filter(function (v, i) { return a.indexOf(v) === i; }); }
+  function renderHome() {
+    var all = allTests();
+    var cs = uniq(all.map(function (t) { return t.country; })), ns = uniq(all.map(function (t) { return t.niche; })), ps = uniq(all.map(function (t) { return t.name; }));
+    if (cs.indexOf(filt.country) < 0) filt.country = ''; if (ns.indexOf(filt.niche) < 0) filt.niche = ''; if (ps.indexOf(filt.product) < 0) filt.product = '';
+    fillSelect($('#f-country'), 'Tous', cs, function (c) { return c + ' · ' + COUNTRIES[c][0]; }, filt.country);
+    fillSelect($('#f-niche'), 'Toutes', ns, null, filt.niche);
+    fillSelect($('#f-product'), 'Tous', ps, null, filt.product);
+    var list = all.filter(function (t) { return (!filt.country || t.country === filt.country) && (!filt.niche || t.niche === filt.niche) && (!filt.product || t.name === filt.product); });
+    var active = filt.country || filt.niche || filt.product;
+    $('#f-reset').hidden = !active;
+    $('#f-count').textContent = list.length + ' test' + (list.length > 1 ? 's' : '') + ' affiché' + (list.length > 1 ? 's' : '');
+    $('#home-count').textContent = list.length + ' test' + (list.length > 1 ? 's' : '');
+
+    // Carte CAC maximal : premier test avec résultats parmi ceux affichés
+    var cur = list.filter(function (t) { return t.results; })[0] || list[0];
+    var k1 = $('#kpi-cac');
+    if (!cur) { k1.innerHTML = '<header class="kpi-head"><h2 class="eyebrow">CAC maximal du test en cours</h2></header><p class="empty-s">Aucun test ne correspond aux filtres.</p>'; }
+    else {
+      var ci = calc(cur), series = cur.daily;
+      k1.innerHTML = '<header class="kpi-head"><h2 class="eyebrow">CAC maximal du test en cours</h2><span class="badge badge-est">Estimé</span></header>' +
+        '<p class="kpi-sub"><a href="#/tests/' + esc(cur.id) + '">' + esc(cur.name) + '</a> · ' + esc(cur.country) + '</p>' +
+        '<div class="kpi-body"><div><p class="kpi-value">' + (ci.ok ? money(ci.cacMax, cur.country) : '—') + '</p>' +
+        '<p class="kpi-meta"><span class="dot ok" aria-hidden="true"></span>ROAS de rentabilité : <strong>' + (ci.ok ? num(ci.roas, 2) : '—') + '</strong></p></div>' +
+        (series ? '<figure class="spark-fig">' + sparkLine(series, 'CAC cumulé par jour, de ' + money(series[0], cur.country) + ' à ' + money(series[series.length - 1], cur.country)) + '<figcaption>CAC obtenu par jour' + (cur.demo ? ' · DEMO' : '') + '</figcaption></figure>' : '') + '</div>';
+    }
+    // Carte dernier diagnostic : test avec résultats le plus récent
+    var withRes = list.filter(function (t) { return t.results; }).sort(function (a, b) { return a.updated < b.updated ? 1 : -1; })[0];
+    var k2 = $('#kpi-diag');
+    if (!withRes) { k2.innerHTML = '<header class="kpi-head"><h2 class="eyebrow">Dernier diagnostic</h2></header><p class="empty-s">Aucun diagnostic disponible : saisissez les résultats d’un test.</p>'; }
+    else {
+      var dg = diagnose(withRes), R = RECO[dg.reco], fr = dg.friction || dg.rates[0];
+      k2.innerHTML = '<header class="kpi-head"><h2 class="eyebrow">Dernier diagnostic</h2>' + statusBadge(withRes) + '</header>' +
+        '<p class="kpi-sub"><a href="#/tests/' + esc(withRes.id) + '">' + esc(withRes.name) + '</a> · ' + esc(withRes.country) + '</p>' +
+        '<p class="diag-line"><span class="diag-word diag-' + R.cls + '">' + R.label + '</span><span class="pill pill-' + R.cls + ' tagpill">' + R.tag + '</span></p>' +
+        '<p class="diag-text">' + esc(dg.headline) + '</p>' + (fr ? funnelBar(fr) : '');
+    }
+    // Tableau
+    $('#home-body').innerHTML = list.length ? list.map(function (t) { return homeRow(t); }).join('') : '<tr class="empty-row"><td colspan="6">Aucun test ne correspond aux filtres. <button class="btn-link" type="button" data-reset-filters>Réinitialiser les filtres</button></td></tr>';
+  }
+  function homeRow(t) {
+    var i = rowInfo(t), R = RECO[i.d.reco];
+    return '<tr data-href="#/tests/' + esc(t.id) + '"><td data-label="Produit"><span class="dot dot-' + R.cls + '" aria-hidden="true"></span><a class="row-link" href="#/tests/' + esc(t.id) + '">' + esc(t.name) + '</a></td>' +
+      '<td data-label="Pays">' + countryCell(t.country) + '</td><td data-label="Budget" class="num">' + money(t.budget, t.country) + '</td>' +
+      '<td data-label="CAC obtenu" class="num strong">' + (i.cac != null ? money(i.cac, t.country) : '—') + '</td><td data-label="Recommandation">' + recoPill(i.d.reco) + '</td><td data-label="Statut">' + statusBadge(t) + '</td></tr>';
+  }
+
+  /* ============ Liste des tests ============ */
+  function renderTests() {
+    var q = $('#tl-q').value.trim().toLowerCase(), rf = $('#tl-reco').value, so = $('#tl-sort').value;
+    var rows = allTests().map(function (t) { return { t: t, i: rowInfo(t) }; }).filter(function (x) {
+      var hay = (x.t.name + ' ' + x.t.country + ' ' + (COUNTRIES[x.t.country] || [''])[0] + ' ' + x.t.niche).toLowerCase();
+      return (!q || hay.indexOf(q) >= 0) && (!rf || x.i.d.reco === rf);
+    });
+    var key = { name: function (x) { return x.t.name.toLowerCase(); }, cac: function (x) { return x.i.cac == null ? 1e9 : x.i.cac; }, net: function (x) { return x.i.net == null ? -1e9 : -x.i.net; } }[so];
+    if (key) rows.sort(function (a, b) { var A = key(a), B = key(b); return A < B ? -1 : A > B ? 1 : 0; });
+    $('#tl-count').textContent = rows.length + ' test' + (rows.length > 1 ? 's' : '');
+    $('#tests-body').innerHTML = rows.length ? rows.map(function (x) {
+      var t = x.t, i = x.i, r = t.results, R = RECO[i.d.reco];
+      return '<tr data-href="#/tests/' + esc(t.id) + '"><td data-label="Produit"><span class="dot dot-' + R.cls + '" aria-hidden="true"></span><a class="row-link" href="#/tests/' + esc(t.id) + '">' + esc(t.name) + '</a></td>' +
+        '<td data-label="Pays">' + countryCell(t.country) + '</td><td data-label="Budget" class="num">' + money(t.budget, t.country) + '</td>' +
+        '<td data-label="Dépensé" class="num">' + (r ? money(r.spent, t.country) : '—') + '</td><td data-label="Commandes" class="num">' + (r ? r.orders : '—') + '</td>' +
+        '<td data-label="CAC obtenu" class="num strong">' + (i.cac != null ? money(i.cac, t.country) : '—') + '</td>' +
+        '<td data-label="Marge nette" class="num ' + (i.net == null ? '' : i.net < 0 ? 'neg' : 'pos') + '">' + (i.net != null ? money(i.net, t.country) : '—') + '</td>' +
+        '<td data-label="Recommandation">' + recoPill(i.d.reco) + '</td><td data-label="Statut">' + statusBadge(t) + '</td></tr>';
+    }).join('') : '<tr class="empty-row"><td colspan="9">Aucun test ne correspond à votre recherche.</td></tr>';
+  }
+
+  /* ============ Fiche d'un test ============ */
+  function cacChart(t, c) {
+    var v = t.daily, n = v.length, W = 520, H = 250, L = 44, R = 84, T = 16, B = 30;
+    var hi = Math.max(Math.max.apply(null, v), c.ok ? c.cacMax : 0) * 1.15, lo = 0;
+    var X = function (i) { return n === 1 ? L + (W - L - R) / 2 : L + i * (W - L - R) / (n - 1); }, Y = function (x) { return T + (H - T - B) * (1 - (x - lo) / (hi - lo)); };
+    var ticks = [0, 1, 2, 3, 4].map(function (k) { return hi / 4 * k; });
+    var grid = ticks.map(function (tk) { return '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(tk).toFixed(1) + '" y2="' + Y(tk).toFixed(1) + '"/><text class="axis" x="' + (L - 8) + '" y="' + (Y(tk) + 4).toFixed(1) + '" text-anchor="end">' + num(tk, 0) + '</text>'; }).join('');
+    var xl = v.map(function (_, i) { return '<text class="axis" x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">J' + (i + 1) + '</text>'; }).join('');
+    var pts = v.map(function (y, i) { return X(i).toFixed(1) + ',' + Y(y).toFixed(1); });
+    var dots = v.map(function (y, i) { return '<circle class="pt" cx="' + X(i).toFixed(1) + '" cy="' + Y(y).toFixed(1) + '" r="4"><title>J' + (i + 1) + ' : ' + money(y, t.country) + '</title></circle>'; }).join('');
+    var ref = c.ok ? '<line class="ref" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(c.cacMax).toFixed(1) + '" y2="' + Y(c.cacMax).toFixed(1) + '"/><text class="lbl ref-lbl" x="' + (W - R + 8) + '" y="' + (Y(c.cacMax) + 4).toFixed(1) + '">CAC max</text>' : '';
+    var last = v[n - 1];
+    var table = '<table class="sr-only"><caption>CAC obtenu par jour</caption><thead><tr><th>Jour</th><th>CAC</th></tr></thead><tbody>' + v.map(function (y, i) { return '<tr><td>J' + (i + 1) + '</td><td>' + money(y, t.country) + '</td></tr>'; }).join('') + '</tbody></table>';
+    return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="CAC obtenu par jour, de ' + money(v[0], t.country) + ' à ' + money(last, t.country) + (c.ok ? ', comparé au CAC maximal de ' + money(c.cacMax, t.country) : '') + '">' + grid + xl + ref +
+      '<path class="series" d="M' + pts.join(' L') + '"/>' + dots + '<text class="lbl" x="' + (W - R + 8) + '" y="' + (Y(last) + (c.ok && Math.abs(Y(last) - Y(c.cacMax)) < 14 ? 16 : 4)).toFixed(1) + '">CAC ' + money(last, t.country) + '</text></svg>' + table;
+  }
+  function kv(label, value, cls) { return '<div class="kv ' + (cls || '') + '"><dt>' + label + '</dt><dd>' + value + '</dd></div>'; }
+  function renderTest(id) {
+    var t = findTest(id), box = $('#dyn');
+    if (!t) { box.innerHTML = '<header class="page-head"><div><h1 tabindex="-1">Test introuvable</h1><p class="lede">Ce test n’existe pas ou a été supprimé.</p></div></header><a class="btn btn-secondary" href="#/tests">Retour à mes tests</a>'; return t; }
+    var c = calc(t), d = diagnose(t), R = RECO[d.reco], f = favs().indexOf(t.id) >= 0, fm = function (v) { return money(v, t.country); }, r = t.results;
+    var h = '<a class="back-btn" href="#/tests">' + ico('left') + 'Mes tests</a>' +
+      '<header class="page-head"><div><h1 tabindex="-1">' + esc(t.name) + '</h1><p class="lede">' + countryCell(t.country) + ' · ' + esc(t.niche) + ' · ' + esc(COUNTRIES[t.country][1]) + ' · mis à jour le ' + esc(dateFr(t.updated)) + '</p></div>' +
+      '<div class="btn-row">' + statusBadge(t) +
+      '<button class="btn btn-secondary" type="button" data-fav="' + esc(t.id) + '" aria-pressed="' + f + '">' + ico('star') + (f ? 'Retirer des favoris' : 'Ajouter aux favoris') + '</button>' +
+      '<a class="btn btn-secondary" href="#/nouveau?from=' + esc(t.id) + '">' + ico('copy') + 'Dupliquer</a>' +
+      (t.demo ? '' : '<a class="btn btn-secondary" href="#/nouveau?edit=' + esc(t.id) + '">' + ico('edit') + 'Modifier</a><button class="btn btn-danger-ghost" type="button" data-del="' + esc(t.id) + '">' + ico('trash') + 'Supprimer</button>') + '</div></header>';
+    if (t.demo) h += '<div class="banner" role="note">' + ico('info') + '<p><strong>Test de démonstration :</strong> toutes les valeurs de cette fiche sont fictives. Vous pouvez le dupliquer pour créer votre propre test.</p></div>';
+    // Diagnostic
+    h += '<section class="card diag-card" aria-labelledby="dg-t"><header class="card-head"><h2 id="dg-t" class="eyebrow">Diagnostic</h2><span class="pill pill-' + R.cls + '"><span class="dot" aria-hidden="true"></span>' + R.label + '</span></header>' +
+      '<p class="diag-line"><span class="diag-word diag-' + R.cls + '">' + R.label + '</span><span class="pill pill-' + R.cls + ' tagpill">' + R.tag + '</span></p><p class="diag-text">' + esc(d.headline) + '</p>' +
+      (d.reasons.length ? '<h3>Pourquoi</h3><ul class="bul">' + d.reasons.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      (d.causes.length ? '<h3>Causes probables <span class="legend-note">à vérifier</span></h3><p>' + esc(d.causes.join(' ; ')) + '. Ce lien est une corrélation observée : il ne prouve pas la cause.</p>' : '') +
+      '<div class="two"><div><h3>À faire</h3><ul class="bul ok">' + d.todo.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' +
+      (d.avoid.length ? '<div><h3>À éviter</h3><ul class="bul bad">' + d.avoid.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' : '') + '</div>' +
+      '<p class="hint">Données manquantes : ' + (t.demo ? 'toutes les valeurs sont fictives. ' : 'résultats saisis à la main, non vérifiés. ') + 'Livraisons, retours et créations ne sont pas suivis. MarketPilot ne modifie jamais un budget ou une campagne sans votre confirmation explicite.</p></section>';
+    // Rentabilité
+    h += '<div class="detail-grid"><section class="card" aria-labelledby="pr-t"><header class="card-head"><h2 id="pr-t" class="eyebrow">Rentabilité unitaire</h2><span class="badge badge-est">Estimé</span></header><dl class="kv-list">' +
+      kv('Prix de vente', fm(t.price)) + kv('Coût produit', '− ' + fm(t.cost)) + kv('Livraison', '− ' + fm(t.ship)) + kv('Frais de paiement', '− ' + fm(c.fee)) + kv('Autres charges', '− ' + fm(t.other)) +
+      kv('Marge unitaire avant publicité', fm(c.m), 'total ' + (c.ok ? 'pos' : 'neg')) + kv('CAC maximal', c.ok ? fm(c.cacMax) : '—', 'strong') + kv('ROAS de rentabilité', c.ok ? num(c.roas, 2) : '—', 'strong') +
+      kv('Commandes pour couvrir le budget', c.breakeven != null ? c.breakeven + ' commandes' : '—') + '</dl></section>';
+    // Résultats
+    h += '<section class="card" aria-labelledby="re-t"><header class="card-head"><h2 id="re-t" class="eyebrow">Résultats</h2>' + (r ? (t.demo ? '<span class="badge badge-demo">DEMO</span>' : '<span class="badge badge-in">Saisi</span>') : '') + '</header>';
+    if (r) {
+      var share = t.budget ? Math.min(100, r.spent / t.budget * 100) : 0;
+      h += '<dl class="kv-list">' + kv('Budget dépensé', fm(r.spent) + ' / ' + fm(t.budget)) + '</dl><div class="bar" role="img" aria-label="' + pct(share) + ' du budget dépensé"><span class="fill" style="width:' + share + '%"></span></div>' +
+        '<dl class="kv-list">' + kv('Commandes', r.orders) + kv('CAC obtenu', d.cac != null ? fm(d.cac) : '—', 'strong') + kv('Marge nette estimée', fm(d.net), 'strong ' + (d.net < 0 ? 'neg' : 'pos')) + kv('Confiance', d.conf) + '</dl>';
+    } else h += '<p class="empty-s">Aucun résultat saisi.</p>';
+    h += '</section></div>';
+    // Entonnoir et courbe
+    if (r) {
+      h += '<div class="detail-grid"><section class="card" aria-labelledby="fu-t"><header class="card-head"><h2 id="fu-t" class="eyebrow">Parcours d’achat</h2></header>' +
+        '<dl class="kv-list">' + kv('Clics', num(r.clicks, 0)) + kv('Visites', num(r.visits, 0)) + kv('Paniers', num(r.carts, 0)) + kv('Paiements démarrés', num(r.checkouts, 0)) + kv('Commandes', num(r.orders, 0)) + '</dl>' +
+        (d.rates.length ? d.rates.map(funnelBar).join('') : '<p class="hint">Volume trop faible pour calculer des taux fiables (30 au minimum par étape).</p>') +
+        '<p class="hint">Seuils indicatifs de démonstration, à calibrer avec vos données.</p></section>';
+      h += '<section class="card" aria-labelledby="ch-t"><header class="card-head"><h2 id="ch-t" class="eyebrow">CAC obtenu par jour</h2>' + (t.demo ? '<span class="badge badge-demo">DEMO</span>' : '') + '</header>' +
+        (t.daily ? '<div class="chart-wrap">' + cacChart(t, c) + '</div>' : '<p class="empty-s">Le suivi quotidien nécessite un compte publicitaire connecté.</p>') + '</section></div>';
+    }
+    // Saisie des résultats (tests créés par l'utilisateur)
+    if (!t.demo) {
+      var v = r || {};
+      var fld = function (k, lab) { return '<div class="field"><label for="rs-' + k + '">' + lab + '</label><input id="rs-' + k + '" name="' + k + '" type="number" inputmode="decimal" min="0" step="' + (k === 'spent' ? '0.01' : '1') + '" value="' + (v[k] != null ? v[k] : '') + '" required></div>'; };
+      h += '<section class="card"><h2 class="eyebrow">Saisir mes résultats</h2><p class="muted">Copiez les chiffres de votre gestionnaire de publicités et de votre boutique. Ils sont marqués « Saisi » et non vérifiés.</p>' +
+        '<form id="form-results" class="grid-3" novalidate data-id="' + esc(t.id) + '">' + fld('spent', 'Dépenses (' + COUNTRIES[t.country][1] + ')') + fld('clicks', 'Clics') + fld('visits', 'Visites') + fld('carts', 'Paniers') + fld('checkouts', 'Paiements démarrés') + fld('orders', 'Commandes') +
+        '<p class="form-error span-3" id="rs-err" role="alert" hidden></p><div class="form-actions span-3"><button class="btn btn-primary" type="submit">Enregistrer les résultats</button></div></form></section>';
+    }
+    h += '<p class="hint source">Source : ' + (t.demo ? 'démonstration (fictive)' : 'saisie manuelle de l’utilisateur') + ' · pays ' + esc(COUNTRIES[t.country][0]) + ' · méthode : calcul dans le navigateur · statut ' + (t.demo ? 'DEMO' : 'Estimé') + '.</p>';
+    box.innerHTML = h; return t;
+  }
+
+  /* ============ Diagnostics, favoris, modules à venir ============ */
+  function diagCard(t) {
+    var d = diagnose(t), R = RECO[d.reco];
+    return '<article class="card diag-mini"><header class="card-head"><h2><a class="row-link" href="#/tests/' + esc(t.id) + '">' + esc(t.name) + '</a></h2>' + statusBadge(t) + '</header>' +
+      '<p class="muted">' + countryCell(t.country) + (d.conf ? ' · confiance ' + d.conf : '') + '</p><p class="diag-line">' + recoPill(d.reco) + '<span class="pill pill-' + R.cls + ' tagpill">' + R.tag + '</span></p><p>' + esc(d.headline) + '</p></article>';
+  }
+  function renderDiagnostics() {
+    return '<header class="page-head"><div><h1 tabindex="-1">Diagnostics</h1><p class="lede">Une recommandation par test : continuer, modifier, tester ou arrêter, avec sa justification.</p></div></header>' +
+      '<div class="card-grid">' + allTests().map(diagCard).join('') + '</div>';
+  }
+  function renderFavoris() {
+    var f = favs(), list = allTests().filter(function (t) { return f.indexOf(t.id) >= 0; });
+    return '<header class="page-head"><div><h1 tabindex="-1">Favoris</h1><p class="lede">Les tests que vous suivez de près.</p></div></header>' +
+      (list.length ? '<div class="card-grid">' + list.map(diagCard).join('') + '</div>' : '<div class="card empty"><p>Aucun favori pour le moment.</p><p class="muted">Ouvrez un test puis choisissez « Ajouter aux favoris ». Les marchés, niches et produits favoris arriveront avec leurs modules.</p><a class="btn btn-secondary" href="#/tests">Voir mes tests</a></div>');
+  }
+  var MODULES = {
+    marches: { t: 'Marchés', step: 'Étape 2 du plan MVP', d: 'Analyse des pays et villes : pouvoir d’achat, demande et taille estimée des marchés.', needs: 'Sources de données publiques à sélectionner, avec source, date, pays et niveau de confiance pour chaque chiffre.', items: ['Classement des pays selon la demande et le pouvoir d’achat', 'Fiche marché avec provenance de chaque donnée', 'Filtres par pays et par niche'] },
+    niches: { t: 'Niches', step: 'Étape 2 du plan MVP', d: 'Classement des niches : croissance, concurrence, saisonnalité et rentabilité potentielle.', needs: 'Sources de tendances à sélectionner ; les estimations resteront clairement séparées des données vérifiées.', items: ['Score d’opportunité par niche', 'Saisonnalité et croissance', 'Passage direct vers la création d’un test'] },
+    produits: { t: 'Produits', step: 'Étape 3 du plan MVP', d: 'Fiches produits : prix, coûts, marges, tendances et score d’opportunité.', needs: 'Catalogue de démonstration marqué DEMO, puis sources réelles (fournisseurs, API) une fois les accès obtenus.', items: ['Fiche produit avec marge estimée', 'Score d’opportunité', 'Création d’un test en un clic'] },
+    import: { t: 'Importer un CSV', step: 'Étape 5 du plan MVP', d: 'Importez les résultats exportés de vos plateformes publicitaires et de votre boutique.', needs: 'Modèle de fichier CSV et correspondance des colonnes. Les lignes importées porteront le statut « Importé ».', items: ['Modèle CSV à télécharger', 'Contrôle des colonnes avant import', 'Diagnostic automatique après import'] }
+  };
+  function renderModule(k) {
+    var m = MODULES[k];
+    return '<header class="page-head"><div><h1 tabindex="-1">' + m.t + '</h1><p class="lede">' + m.d + '</p></div><span class="pill pill-off">Bientôt</span></header>' +
+      '<div class="card empty-module"><h2 class="eyebrow">Ce module n’est pas encore disponible</h2><p>Il est prévu à l’<strong>' + m.step + '</strong>. Aucune statistique n’est inventée : ce module n’affichera que des données avec source ou clairement marquées DEMO.</p>' +
+      '<h3>Ce qu’il fera</h3><ul class="bul">' + m.items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul><h3>Prérequis</h3><p>' + m.needs + '</p><a class="btn btn-secondary" href="#/accueil">Retour au tableau de bord</a></div>';
+  }
+
+  /* ============ Formulaire « Nouveau test » ============ */
+  var formMode = { edit: null };
+  var FIELDS = ['name', 'price', 'cost', 'ship', 'other', 'feepct', 'feefix', 'budget', 'days'];
+  function fv(k) { return $('#nt-' + k).value; }
+  function readTest() {
+    var n = function (k) { var v = parseFloat(fv(k)); return isNaN(v) ? 0 : v; };
+    return { name: fv('name').trim(), niche: fv('niche'), country: fv('country'), price: n('price'), cost: n('cost'), ship: n('ship'), other: n('other'), feePct: n('feepct'), feeFix: n('feefix'), budget: n('budget'), days: parseInt(fv('days'), 10) || 0 };
+  }
+  function liveCalc() {
+    var t = readTest(), cc = t.country, cur = COUNTRIES[cc][1];
+    $('#nt-cur').textContent = '(' + cur + ')';
+    $('#nt-cur-hint').textContent = 'Devise du test : ' + cur;
+    var out = $('#calc-out');
+    if (!(t.price > 0)) { out.innerHTML = kv('Marge unitaire', '—') + kv('CAC maximal', '—') + kv('ROAS de rentabilité', '—') + kv('Commandes pour couvrir le budget', '—') + '<p class="hint">Saisissez un prix de vente pour voir le calcul.</p>'; return; }
+    var c = calc(t), fm = function (v) { return money(v, cc); };
+    out.innerHTML = kv('Frais de paiement', fm(c.fee)) + kv('Marge unitaire avant publicité', fm(c.m), 'total ' + (c.ok ? 'pos' : 'neg')) + kv('CAC maximal', c.ok ? fm(c.cacMax) : '—', 'strong') + kv('ROAS de rentabilité', c.ok ? num(c.roas, 2) : '—', 'strong') +
+      kv('Commandes pour couvrir le budget', c.breakeven != null ? c.breakeven + ' commandes' : '—') +
+      (c.ok ? '' : '<p class="form-error">Marge unitaire négative ou nulle : à ce prix, aucune publicité ne peut être rentable. Revoyez le prix ou les coûts.</p>');
+  }
+  function fieldErr(k, msg) {
+    var el = $('#nt-' + k), er = $('#nt-' + k + '-err');
+    if (!er) return;
+    er.textContent = msg || ''; er.hidden = !msg;
+    if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+  }
+  function validateTest() {
+    var t = readTest(), bad = [], raw = function (k) { return fv(k).trim() === ''; };
+    var rules = {
+      name: t.name ? '' : 'Indiquez le nom du produit.',
+      price: raw('price') || !(t.price > 0) ? 'Indiquez un prix de vente supérieur à 0.' : '',
+      cost: raw('cost') || t.cost < 0 ? 'Indiquez le coût produit (0 ou plus).' : '',
+      ship: t.ship < 0 ? 'La livraison ne peut pas être négative.' : '',
+      other: t.other < 0 ? 'Les charges ne peuvent pas être négatives.' : '',
+      feepct: t.feePct < 0 || t.feePct > 30 ? 'Entrez un pourcentage entre 0 et 30.' : '',
+      feefix: t.feeFix < 0 ? 'Les frais fixes ne peuvent pas être négatifs.' : '',
+      budget: raw('budget') || !(t.budget > 0) ? 'Indiquez un budget supérieur à 0.' : '',
+      days: t.days < 1 || t.days > 90 ? 'Entrez une durée entre 1 et 90 jours.' : ''
+    };
+    FIELDS.forEach(function (k) { fieldErr(k, rules[k]); if (rules[k]) bad.push(k); });
+    var s = $('#nt-summary');
+    if (bad.length) { s.textContent = bad.length === 1 ? 'Un champ est à corriger.' : bad.length + ' champs sont à corriger.'; s.hidden = false; $('#nt-' + bad[0]).focus(); } else s.hidden = true;
+    return !bad.length;
+  }
+  function setupForm(q) {
+    var form = $('#form-test'); form.reset(); $('#nt-summary').hidden = true; FIELDS.forEach(function (k) { fieldErr(k, ''); });
+    formMode.edit = null;
+    var set = function (k, v) { $('#nt-' + k).value = v; };
+    $('#nt-niche').value = NICHES[0]; $('#nt-country').value = 'FR'; set('feepct', '2.9'); set('feefix', '0.30'); set('days', '7');
+    var src = q.get('edit') ? findTest(q.get('edit')) : q.get('from') ? findTest(q.get('from')) : null;
+    if (src && q.get('edit') && src.demo) src = null;
+    if (src) {
+      set('name', q.get('from') ? src.name + ' (copie)' : src.name); $('#nt-niche').value = src.niche; $('#nt-country').value = src.country;
+      set('price', src.price); set('cost', src.cost); set('ship', src.ship); set('other', src.other); set('feepct', src.feePct); set('feefix', src.feeFix); set('budget', src.budget); set('days', src.days);
+      if (q.get('edit')) formMode.edit = src.id;
+    }
+    var edit = !!formMode.edit;
+    $('#nt-title').textContent = edit ? 'Modifier le test' : 'Nouveau test publicitaire';
+    $('#nt-submit').textContent = edit ? 'Enregistrer les modifications' : 'Créer le test';
+    $('#nt-cancel').setAttribute('href', edit ? '#/tests/' + formMode.edit : '#/tests');
+    liveCalc();
+  }
+  function submitTest(e) {
+    e.preventDefault();
+    if (!validateTest()) return;
+    var t = readTest(), arr = userTests(), old = formMode.edit ? arr.filter(function (x) { return x.id === formMode.edit; })[0] : null;
+    var rec = { id: old ? old.id : 'u' + Date.now().toString(36), demo: false, name: t.name, niche: t.niche, country: t.country, price: t.price, cost: t.cost, ship: t.ship, feePct: t.feePct, feeFix: t.feeFix, other: t.other, budget: t.budget, days: t.days, updated: new Date().toISOString(), results: old ? old.results : null };
+    if (old) arr = arr.map(function (x) { return x.id === old.id ? rec : x; }); else arr.push(rec);
+    saveUserTests(arr); updateCount();
+    toast(old ? 'Test modifié.' : 'Test créé. Saisissez maintenant vos résultats.');
+    location.hash = '#/tests/' + rec.id;
+  }
+  function submitResults(e) {
+    e.preventDefault();
+    var f = e.target, t = userTests().filter(function (x) { return x.id === f.dataset.id; })[0]; if (!t) return;
+    var r = {}, err = $('#rs-err'), ok = true;
+    ['spent', 'clicks', 'visits', 'carts', 'checkouts', 'orders'].forEach(function (k) { var v = parseFloat(f.elements[k].value); if (isNaN(v) || v < 0) ok = false; r[k] = v; });
+    if (!ok) { err.textContent = 'Renseignez les six valeurs (nombres positifs ou nuls).'; err.hidden = false; return; }
+    if (r.visits > r.clicks || r.carts > r.visits || r.checkouts > r.carts || r.orders > r.checkouts) { err.textContent = 'Chaque étape ne peut pas dépasser la précédente (clics ≥ visites ≥ paniers ≥ paiements ≥ commandes).'; err.hidden = false; return; }
+    t.results = r; t.updated = new Date().toISOString();
+    saveUserTests(userTests().map(function (x) { return x.id === t.id ? t : x; }));
+    toast('Résultats enregistrés.'); route();
+  }
+  function updateCount() { $('#nav-count').textContent = allTests().length; }
+
+  /* ============ Paramètres ============ */
+  function setupSettings() {
+    var p = getProfile() || {}, s = getSession() || {};
+    $('#p-name').value = s.guest ? 'Invité' : (p.name || s.name || ''); $('#p-name').disabled = !!s.guest;
+    $('#p-mail').value = s.guest ? '' : (p.email || s.email || ''); $('#p-ws').value = (p.workspace || 'Mon espace de travail');
+    var pref = store.get(KEYS.theme, 'auto'); $$('input[name=theme]').forEach(function (r) { r.checked = r.value === pref; });
+  }
+
+  /* ============ Thème ============ */
+  var darkMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  function applyTheme() {
+    var pref = store.get(KEYS.theme, 'auto'), dark = pref === 'dark' || (pref === 'auto' && darkMQ && darkMQ.matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var b = $('#theme-toggle'); b.setAttribute('aria-label', dark ? 'Passer au thème clair' : 'Passer au thème sombre');
+    b.innerHTML = ico(dark ? 'sun' : 'moon');
+  }
+  function toggleTheme() { store.set(KEYS.theme, document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); applyTheme(); }
+
+  /* ============ Menu latéral ============ */
+  var mq = window.matchMedia('(max-width: 960px)'), navOpen = false, collapsed = false;
+  function syncNav() {
+    var mobile = mq.matches, visible = mobile ? navOpen : !collapsed, sb = $('#sidebar');
+    $('#app').classList.toggle('nav-open', mobile && navOpen); $('#app').classList.toggle('nav-collapsed', !mobile && collapsed);
+    if ('inert' in sb) sb.inert = !visible;
+    $('#scrim').hidden = !(mobile && navOpen);
+    $('#gsearch').placeholder = mobile ? 'Rechercher…' : 'Rechercher un marché, une niche, un produit…';
+    var b = $('#nav-toggle'); b.setAttribute('aria-expanded', String(visible)); b.setAttribute('aria-label', visible ? 'Masquer le menu' : 'Ouvrir le menu');
+  }
+  function toggleNav() { if (mq.matches) navOpen = !navOpen; else collapsed = !collapsed; syncNav(); }
+  function closeNav() { if (mq.matches && navOpen) { navOpen = false; syncNav(); } }
+
+  /* ============ Recherche globale ============ */
+  var PAGES = [
+    { l: 'Accueil', h: '#/accueil', k: 'tableau de bord dashboard' }, { l: 'Marchés', h: '#/marches', k: 'pays marche demande' }, { l: 'Niches', h: '#/niches', k: 'niche tendance' },
+    { l: 'Produits', h: '#/produits', k: 'produit fiche' }, { l: 'Mes tests', h: '#/tests', k: 'historique campagnes' }, { l: 'Nouveau test', h: '#/nouveau', k: 'creer test publicitaire calcul cac roas' },
+    { l: 'Importer un CSV', h: '#/import', k: 'import fichier' }, { l: 'Diagnostics', h: '#/diagnostics', k: 'recommandation' }, { l: 'Connecteurs', h: '#/connecteurs', k: 'meta tiktok shopify woocommerce api' },
+    { l: 'Favoris', h: '#/favoris', k: 'etoile' }, { l: 'Paramètres', h: '#/parametres', k: 'theme profil compte langue' }
+  ];
+  var norm = function (s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
+  var gsItems = [], gsIdx = -1;
+  function gsRender() {
+    var input = $('#gsearch'), list = $('#gsearch-list'), q = norm(input.value.trim());
+    if (!q) { gsClose(); return; }
+    var tests = allTests().filter(function (t) { return norm(t.name + ' ' + t.niche + ' ' + (COUNTRIES[t.country] || [''])[0] + ' ' + t.country).indexOf(q) >= 0; }).slice(0, 5).map(function (t) { return { l: t.name, h: '#/tests/' + t.id, g: 'Test · ' + t.country }; });
+    var pages = PAGES.filter(function (p) { return norm(p.l + ' ' + p.k).indexOf(q) >= 0; }).slice(0, 5).map(function (p) { return { l: p.l, h: p.h, g: 'Page' }; });
+    gsItems = tests.concat(pages); gsIdx = gsItems.length ? 0 : -1;
+    list.innerHTML = gsItems.length ? gsItems.map(function (x, i) { return '<li role="option" id="gs-' + i + '" data-i="' + i + '"' + (i === 0 ? ' aria-selected="true"' : ' aria-selected="false"') + '><span>' + esc(x.l) + '</span><small>' + esc(x.g) + '</small></li>'; }).join('') : '<li class="none" role="option" aria-disabled="true" aria-selected="false">Aucun résultat pour « ' + esc(input.value.trim()) + ' »</li>';
+    list.hidden = false; input.setAttribute('aria-expanded', 'true');
+    if (gsIdx >= 0) input.setAttribute('aria-activedescendant', 'gs-0'); else input.removeAttribute('aria-activedescendant');
+  }
+  function gsClose() { $('#gsearch-list').hidden = true; $('#gsearch').setAttribute('aria-expanded', 'false'); $('#gsearch').removeAttribute('aria-activedescendant'); gsIdx = -1; }
+  function gsGo(i) { var x = gsItems[i]; if (!x) return; $('#gsearch').value = ''; gsClose(); closeNav(); location.hash = x.h; }
+  function gsMove(d) {
+    if (!gsItems.length) return;
+    gsIdx = (gsIdx + d + gsItems.length) % gsItems.length;
+    $$('#gsearch-list li').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === gsIdx)); });
+    $('#gsearch').setAttribute('aria-activedescendant', 'gs-' + gsIdx);
+  }
+
+  /* ============ Authentification locale (prototype) ============ */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function authErr(id, msg) { var e = $('#' + id + '-err'), inp = $('#' + id); e.textContent = msg || ''; e.hidden = !msg; if (msg) inp.setAttribute('aria-invalid', 'true'); else inp.removeAttribute('aria-invalid'); }
+  function submitLogin(e) {
+    e.preventDefault();
+    var email = $('#login-email').value.trim(), pass = $('#login-pass').value, bad = null, g = $('#login-err'); g.hidden = true;
+    authErr('login-email', EMAIL_RE.test(email) ? '' : 'Entrez une adresse e-mail valide.'); if (!EMAIL_RE.test(email)) bad = '#login-email';
+    authErr('login-pass', pass ? '' : 'Entrez votre mot de passe.'); if (!pass && !bad) bad = '#login-pass';
+    if (bad) { $(bad).focus(); return; }
+    var p = getProfile();
+    if (!p || p.email.toLowerCase() !== email.toLowerCase()) { g.textContent = 'Aucun compte local avec cet e-mail sur cet appareil. Créez un compte ou explorez la démonstration.'; g.hidden = false; return; }
+    store.set(KEYS.session, { name: p.name, email: p.email }); $('#form-login').reset(); location.hash = '#/accueil';
+  }
+  function submitSignup(e) {
+    e.preventDefault();
+    var name = $('#su-name').value.trim(), email = $('#su-email').value.trim(), pass = $('#su-pass').value, first = null;
+    var chk = function (id, ok, msg) { authErr(id, ok ? '' : msg); if (!ok && !first) first = '#' + id; };
+    chk('su-name', name.length >= 2, 'Entrez votre nom complet.');
+    chk('su-email', EMAIL_RE.test(email), 'Entrez une adresse e-mail valide.');
+    chk('su-pass', pass.length >= 8, 'Le mot de passe doit contenir au moins 8 caractères.');
+    if (first) { $(first).focus(); return; }
+    var old = getProfile();
+    if (old && old.email.toLowerCase() === email.toLowerCase()) { authErr('su-email', 'Un compte existe déjà avec cet e-mail sur cet appareil. Connectez-vous.'); $('#su-email').focus(); return; }
+    store.set(KEYS.profile, { name: name, email: email, workspace: 'Mon espace de travail' }); store.set(KEYS.session, { name: name, email: email });
+    $('#form-signup').reset(); toast('Compte créé. Bienvenue, ' + name.split(' ')[0] + ' !'); location.hash = '#/accueil';
+  }
+  function logout() { store.del(KEYS.session); closeNav(); $('#user-pop').hidden = true; $('#user-btn').setAttribute('aria-expanded', 'false'); location.hash = '#/connexion'; }
+
+  /* ============ Routage ============ */
+  var firstRender = true;
+  function setIdentity() {
+    var s = getSession(), p = getProfile() || {}, n = displayName(), ws = (p.workspace || 'Mon espace de travail');
+    $('#avatar-initials').textContent = initials(n); $('#pop-name').textContent = n; $('#pop-mail').textContent = s && !s.guest ? s.email : 'Mode démonstration';
+    $('#ws-name').textContent = ws; $('#ws-initials').textContent = initials(ws);
+  }
+  function parseHash() {
+    var h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('?'), path = i < 0 ? h : h.slice(0, i), qs = i < 0 ? '' : h.slice(i + 1), parts = path.split('/').filter(Boolean);
+    return { name: parts[0] || '', arg: parts[1] || '', q: new URLSearchParams(qs) };
+  }
+  function showPage(name) { $$('.page').forEach(function (p) { p.hidden = p.getAttribute('data-page') !== name; }); }
+  function route() {
+    var r = parseHash(), s = getSession(), authViews = ['connexion', 'inscription'];
+    if (!s) {
+      if (authViews.indexOf(r.name) < 0) { location.replace('#/connexion'); return; }
+      $('#app').hidden = true; $('#auth').hidden = false;
+      $('#view-connexion').hidden = r.name !== 'connexion'; $('#view-inscription').hidden = r.name !== 'inscription';
+      document.title = (r.name === 'connexion' ? 'Connexion' : 'Créer un compte') + ' — MarketPilot';
+      if (!firstRender) $(r.name === 'connexion' ? '#login-title' : '#signup-title').focus({ preventScroll: true });
+      firstRender = false; window.scrollTo(0, 0); return;
+    }
+    if (!r.name || authViews.indexOf(r.name) >= 0) { location.replace('#/accueil'); return; }
+    $('#auth').hidden = true; $('#app').hidden = false; setIdentity(); updateCount();
+    var page = r.name, title = '', crumb = '', nav = r.name, t;
+    if (page === 'accueil') { title = crumb = 'Accueil'; showPage('accueil'); renderHome(); }
+    else if (page === 'tests' && !r.arg) { title = crumb = 'Mes tests'; showPage('tests'); renderTests(); }
+    else if (page === 'tests') { showPage('dyn'); t = renderTest(r.arg); title = crumb = t ? t.name : 'Test introuvable'; }
+    else if (page === 'nouveau') { title = crumb = r.q.get('edit') ? 'Modifier le test' : 'Nouveau test'; showPage('nouveau'); setupForm(r.q); }
+    else if (page === 'connecteurs') { title = crumb = 'Connecteurs'; showPage('connecteurs'); }
+    else if (page === 'parametres') { title = crumb = 'Paramètres'; showPage('parametres'); setupSettings(); }
+    else if (page === 'diagnostics') { title = crumb = 'Diagnostics'; showPage('dyn'); $('#dyn').innerHTML = renderDiagnostics(); }
+    else if (page === 'favoris') { title = crumb = 'Favoris'; showPage('dyn'); $('#dyn').innerHTML = renderFavoris(); }
+    else if (MODULES[page]) { title = crumb = MODULES[page].t; showPage('dyn'); $('#dyn').innerHTML = renderModule(page); }
+    else { title = crumb = 'Page introuvable'; nav = ''; showPage('dyn'); $('#dyn').innerHTML = '<header class="page-head"><div><h1 tabindex="-1">Page introuvable</h1><p class="lede">Cette page n’existe pas.</p></div></header><a class="btn btn-secondary" href="#/accueil">Retour au tableau de bord</a>'; }
+    document.title = title + ' — MarketPilot'; $('#crumb').textContent = crumb;
+    $$('[data-nav]').forEach(function (a) { if (a.getAttribute('data-nav') === nav) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    closeNav(); gsClose();
+    window.scrollTo(0, 0);
+    if (!firstRender) { var h1 = $('.page:not([hidden]) h1'); if (h1) h1.focus({ preventScroll: true }); }
+    firstRender = false;
+  }
+
+  /* ============ Branchement des événements ============ */
+  function init() {
+    $('#nt-niche').innerHTML = NICHES.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('');
+    $('#nt-country').innerHTML = Object.keys(COUNTRIES).map(function (c) { return '<option value="' + c + '">' + esc(COUNTRIES[c][0]) + ' (' + COUNTRIES[c][1] + ')</option>'; }).join('');
+    if (/Mac|iPhone|iPad/.test(navigator.platform || '')) $('#kbd-hint').textContent = '⌘K';
+
+    window.addEventListener('hashchange', route);
+    $('#form-login').addEventListener('submit', submitLogin); $('#form-signup').addEventListener('submit', submitSignup);
+    $('#btn-guest').addEventListener('click', function () { store.set(KEYS.session, { guest: true }); location.hash = '#/accueil'; });
+    $('#btn-forgot').addEventListener('click', function () { toast('Indisponible dans le prototype : la réinitialisation par e-mail arrivera avec l’authentification réelle.'); });
+    $$('[data-eye]').forEach(function (b) { b.addEventListener('click', function () { var i = $('#' + b.dataset.eye), show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.setAttribute('aria-pressed', String(show)); b.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); b.innerHTML = ico(show ? 'eyeoff' : 'eye'); }); });
+    $('#btn-logout').addEventListener('click', logout); $('#btn-logout-2').addEventListener('click', logout);
+
+    $('#nav-toggle').addEventListener('click', toggleNav); $('#scrim').addEventListener('click', closeNav);
+    (mq.addEventListener ? mq.addEventListener('change', syncNav) : mq.addListener(syncNav)); syncNav();
+    $('#theme-toggle').addEventListener('click', toggleTheme);
+    if (darkMQ) (darkMQ.addEventListener ? darkMQ.addEventListener('change', applyTheme) : darkMQ.addListener(applyTheme));
+    applyTheme();
+    $$('input[name=theme]').forEach(function (r) { r.addEventListener('change', function () { store.set(KEYS.theme, r.value); applyTheme(); }); });
+
+    $('#user-btn').addEventListener('click', function () { var p = $('#user-pop'); p.hidden = !p.hidden; this.setAttribute('aria-expanded', String(!p.hidden)); });
+    var gs = $('#gsearch');
+    gs.addEventListener('input', gsRender); gs.addEventListener('focus', function () { if (gs.value.trim()) gsRender(); });
+    gs.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); gsMove(1); } else if (e.key === 'ArrowUp') { e.preventDefault(); gsMove(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (gsIdx >= 0) gsGo(gsIdx); } else if (e.key === 'Escape') { gs.value = ''; gsClose(); }
+    });
+    $('#gsearch-list').addEventListener('mousedown', function (e) { var li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); gsGo(+li.dataset.i); } });
+    $('#side-search').addEventListener('click', function () { closeNav(); gs.focus(); });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.gsearch')) gsClose();
+      if (!e.target.closest('.user-menu')) { $('#user-pop').hidden = true; $('#user-btn').setAttribute('aria-expanded', 'false'); }
+      var tr = e.target.closest('tr[data-href]'); if (tr && !e.target.closest('a,button')) location.hash = tr.dataset.href;
+      var fv_ = e.target.closest('[data-fav]');
+      if (fv_) { var id = fv_.dataset.fav, f = favs(), i = f.indexOf(id); if (i >= 0) f.splice(i, 1); else f.push(id); store.set(KEYS.favs, f); route(); toast(i >= 0 ? 'Retiré des favoris.' : 'Ajouté aux favoris.'); }
+      var dl = e.target.closest('[data-del]');
+      if (dl) confirmDialog('Supprimer ce test ?', 'Le test et ses résultats saisis seront supprimés de cet appareil.', 'Supprimer', function () { saveUserTests(userTests().filter(function (x) { return x.id !== dl.dataset.del; })); toast('Test supprimé.'); location.hash = '#/tests'; });
+      if (e.target.closest('[data-reset-filters]')) $('#f-reset').click();
+    });
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && !$('#app').hidden) { e.preventDefault(); closeNav(); gs.focus(); gs.select(); }
+      if (e.key === 'Escape') { closeNav(); $('#user-pop').hidden = true; $('#user-btn').setAttribute('aria-expanded', 'false'); }
+    });
+    document.addEventListener('submit', function (e) { if (e.target.id === 'form-results') submitResults(e); });
+
+    [['#f-country', 'country'], ['#f-niche', 'niche'], ['#f-product', 'product']].forEach(function (p) { $(p[0]).addEventListener('change', function () { filt[p[1]] = this.value; renderHome(); }); });
+    $('#f-reset').addEventListener('click', function () { filt = { country: '', niche: '', product: '' }; renderHome(); $('#f-country').focus(); });
+    ['#tl-q', '#tl-reco', '#tl-sort'].forEach(function (s) { $(s).addEventListener('input', renderTests); });
+
+    $('#form-test').addEventListener('submit', submitTest);
+    $('#form-test').addEventListener('input', function (e) { liveCalc(); if (e.target.id && e.target.id.indexOf('nt-') === 0 && !$('#nt-summary').hidden) validateTest(); });
+    $('#form-profile').addEventListener('submit', function (e) {
+      e.preventDefault(); var s = getSession(), p = getProfile() || {}, ws = $('#p-ws').value.trim() || 'Mon espace de travail';
+      if (!s.guest) { var n = $('#p-name').value.trim() || p.name; p.name = n; s.name = n; store.set(KEYS.session, s); }
+      p.workspace = ws; store.set(KEYS.profile, p.email ? p : Object.assign({ name: 'Invité', email: '' }, p)); setIdentity(); toast('Paramètres enregistrés.');
+    });
+    $('#btn-export').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify({ exporte_le: new Date().toISOString(), tests: userTests() }, null, 2)], { type: 'application/json' }), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'marketpilot-tests.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000); toast('Export téléchargé.');
+    });
+    $('#btn-clear-tests').addEventListener('click', function () { confirmDialog('Supprimer vos tests ?', 'Tous les tests que vous avez créés seront supprimés de cet appareil. Les tests DEMO restent.', 'Supprimer', function () { store.del(KEYS.tests); store.del(KEYS.favs); updateCount(); toast('Vos tests ont été supprimés.'); }); });
+    $('#btn-clear-all').addEventListener('click', function () { confirmDialog('Supprimer le compte local ?', 'Votre compte, vos tests et vos favoris seront effacés de cet appareil.', 'Tout supprimer', function () { [KEYS.session, KEYS.profile, KEYS.tests, KEYS.favs].forEach(store.del); location.hash = '#/connexion'; toast('Compte local supprimé.'); }); });
+
+    route();
+  }
+  init();
+})();
+</script>
 </body>
 </html>
